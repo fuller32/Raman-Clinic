@@ -5,3 +5,5 @@
 *.csv
 #Prevents word temp files from being saved.
 ~$*
+#Don't upload .mat files
+*.mat

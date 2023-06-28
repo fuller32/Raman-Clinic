@@ -4,16 +4,23 @@ function [data] = read_Ondax_files
 
 clear all
 
-% choose files to convert
-[filename, pathname]=uigetfile('*.csv','MultiSelect','on');
-if ~iscell(filename) && ischar(filename)
-    filename = {filename}; % force it to be a cell array of strings
-end
+% % choose files to convert
+% [filename, pathname]=uigetfile('*.csv','MultiSelect','on');
+% if ~iscell(filename) && ischar(filename)
+%     filename = {filename}; % force it to be a cell array of strings
+% end
+%Updated 6/28/2023 SF
+%Changed to be directory select to avoid windows issue with large dataset
+%selection
+
+rootPath = uigetdir;
+%Create regexp
+csvFiles = fullfile(rootPath,'my*.csv'); %Add my so we don't include _my file
 
 
-for ii=1:length(filename)
+for ii=1:length(csvFiles)
     
-   c=dlmread(strcat(pathname,filename{ii}),',',2,0);
+   c=dlmread(fullfile(rootPath,csvFiles(ii).name),',',2,0);
       if ii==1
           data(:,1)=c(:,1);
           data(:,2)=c(:,2);
@@ -22,7 +29,7 @@ for ii=1:length(filename)
       end
 end
 
-dlmwrite(strcat(pathname,'_',filename{ii}(1:end-4),'.csv'),data,'precision','%f');
+dlmwrite(strcat(rootPath,'_',csvFiles(ii).name(1:end-4),'.csv'),data,'precision','%f');
 
 % if length(filename)>1
 %     average_data(:,1)=data(:,1);
