@@ -1,0 +1,7 @@
+#Prevents auto saves from being commited
+*.asv
+#Prevents data files from being added
+	#.keep folder added to repository *.csv stops the files from being added 
+*.csv
+#Prevents word temp files from being saved.
+~$*
