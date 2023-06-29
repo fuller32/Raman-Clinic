@@ -7,3 +7,5 @@
 ~$*
 #Don't upload .mat files
 *.mat
+#Don't upload images
+*.png

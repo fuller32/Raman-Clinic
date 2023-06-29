@@ -15,8 +15,8 @@ clear all
 
 rootPath = uigetdir;
 %Create regexp
-csvFiles = fullfile(rootPath,'my*.csv'); %Add my so we don't include _my file
-
+csvRegExp = fullfile(rootPath,'my*.csv'); %Add my so we don't include _my file
+csvFiles = dir(csvRegExp);
 
 for ii=1:length(csvFiles)
     
@@ -27,9 +27,13 @@ for ii=1:length(csvFiles)
       else
           data(:,ii+1)=c(:,2);
       end
+  % Added so I can see where we are in the loop.
+  if mod(ii,10000) == 0
+      disp(ii);
+  end
 end
 
-dlmwrite(strcat(rootPath,'_',csvFiles(ii).name(1:end-4),'.csv'),data,'precision','%f');
+dlmwrite(fullfile(rootPath,['_',csvFiles(ii).name(1:end-4),'.csv']),data,'precision','%f');
 
 % if length(filename)>1
 %     average_data(:,1)=data(:,1);

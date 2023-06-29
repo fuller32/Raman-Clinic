@@ -121,7 +121,16 @@ if range == 0
 else
     writematrix(R,'Epoxy' + name + '_'+ num2str(range)+ 's.csv')
 end
+%Updated 6/28/2023 SF
+%Have the save function set to version -7.3 to allow for variables of size
+%>=2GB. Needs to be a 64 bit machine to work so check has been added.
 
+comp = mexext;
+if 1 == strcmp(comp,'mexw64')
+    save('Epoxy' + name + '_' + num2str(range) + 's_fitparameters','fitparams','-v7.3');
+else
+    disp("Your machine is 32-bit and may have issues with saving matlab variables greater then 2GB")
+    save('Epoxy' + name + '_' + num2str(range) + 's_fitparameters','fitparams');
+end
 
-save('Epoxy' + name + '_' + num2str(range) + 's_fitparameters','fitparams')
 end

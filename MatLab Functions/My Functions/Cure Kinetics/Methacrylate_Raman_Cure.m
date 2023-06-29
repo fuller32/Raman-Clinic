@@ -133,3 +133,4 @@ else
     disp("Your machine is 32-bit and may have issues with saving matlab variables greater then 2GB")
     save(name + '_' + num2str(range) + 's_fitparameters','fitparams');
 end
+end
