@@ -18,13 +18,13 @@ function codeOrder = executionOrder
     %Basic idea is the name of the Resin will determine what tests need to
     %be ran.
     Epon828.name = "Epon 828";
-    Epon828.order = ["read_Ondax_files.m",...
-                    "Epoxy_Raman_Cure.m",...
-                    "LA_Raman_Cure.m"];
+    Epon828.order = ["read_Ondax_files",...
+                    "Epoxy_Raman_Cure",...
+                    "LA_Raman_Cure"];
 
     %Include the different setups into the return (Right now it is only
     %Epon828 need a better understanding of what needs to be ran for the
     %other resins.)
-    codeOrder = Epon828;
+    codeOrder.Epon828 = Epon828;
 end
 

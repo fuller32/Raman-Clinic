@@ -25,12 +25,19 @@ classdef mainGUI < handle
 %}
     properties
         versionCtrl
+        fntOrder
         excelName = "Copy of Kinetics Experiments.xlsx";
         fontSz
         figure
         UIGrids
         UIelements
         excelData
+        activeTest
+        activeTestInfo
+        activeTestname
+        activeTestOrder
+        progUI
+        filePath
     end
     
     methods
@@ -40,6 +47,9 @@ classdef mainGUI < handle
             %can be made more robust but good enough for now.
             disp("Getting GIT Version");
             [~,obj.versionCtrl] = system('git rev-parse HEAD');
+
+            %Read in function Execution Order
+            obj.fntOrder = executionOrder;
 
             %Call the method to generate the form
             disp("Creating UI Form");
@@ -90,17 +100,16 @@ classdef mainGUI < handle
             %Middle Grid
             grids.midGrid = uigridlayout(grids.mainGrid,[1,2]);
             grids.midGrid.Layout.Row = 2;
-            grids.midGrid.ColumnWidth = {'.75x','1x'};
+            grids.midGrid.ColumnWidth = {'.5x','1x'};
                 %Grid that will hold the plots
                 grids.midR = uigridlayout(grids.midGrid,[2,1]);
                 grids.midR.Layout.Column = 2;
                 grids.midR.Layout.Row = 1;
                 grids.midR.RowHeight = {'1x','.15x'};
-                uibutton(grids.midR);
-                uibutton(grids.midR);
+
                 %Grid that will hold test selection
                     %Size will change depending on test selected
-                grids.midL = uigridlayout(grids.midGrid,[4,3]);
+                grids.midL = uigridlayout(grids.midGrid,[1,3]);
                 grids.midL.RowHeight = {'fit'};
                 grids.midL.Layout.Column = 1;
                 grids.midL.Layout.Row = 1;
@@ -167,13 +176,16 @@ classdef mainGUI < handle
                 subFolders = subFolders(~ismember({subFolders(:).name},{'.','..'}));
                 subFolders = {subFolders.name};
                 misc.dataDrpDwn = uidropdown(bgrid,"Items",subFolders,...
-                    "FontSize",obj.fontSz.subheadingFontSize);
+                    "FontSize",obj.fontSz.subheadingFontSize,"ValueChangedFcn",...
+                    @(h,e)selectedTest(obj));
                 misc.dataDrpDwn.Layout.Row = 3;
                 misc.dataDrpDwn.Layout.Column = 2;
+                obj.activeTest = misc.dataDrpDwn.Value;
 
                 %Create buttons
                 buttons.runBtn = uibutton(bgrid,"Text","Run Selected Functions",...
-                    "FontSize",obj.fontSz.subheadingFontSize);
+                    "FontSize",obj.fontSz.subheadingFontSize,"ButtonPushedFcn",...
+                    @(h,e)runFunctions(obj));
                 buttons.runBtn.Layout.Row = 1;
                 buttons.runBtn.Layout.Column = 1;
 
@@ -187,7 +199,7 @@ classdef mainGUI < handle
             %Left side
                 labels.checkLbl = uilabel(mLgrid,"Text","Enable Function",...
                     "FontSize",obj.fontSz.subheadingFontSize,"FontWeight","bold",...
-                    "HorizontalAlignment","center");
+                    "HorizontalAlignment","left");
                 labels.checkLbl.Layout.Row = 1;
                 labels.checkLbl.Layout.Column = 1;
 
@@ -203,13 +215,27 @@ classdef mainGUI < handle
                 labels.statusLbl.Layout.Row = 1;
                 labels.statusLbl.Layout.Column = 3;
 
+            %Right side
+                axes.plotAxes = uiaxes(mRgrid);
+                axes.plotAxes.Layout.Row = 1;
+                axes.plotAxes.Layout.Column = 1;
+
+                misc.axesDrpDown = uidropdown(mRgrid,"FontSize",...
+                    obj.fontSz.subheadingFontSize);
+                misc.axesDrpDown.Layout.Row = 2;
+                misc.axesDrpDown.Layout.Column = 1;
+
+
             %Collect UI elements
             elements.misc = misc;
             elements.labels = labels;
             elements.buttons = buttons;
+            elements.axes = axes;
 
             %Write UI elements to class property
             obj.UIelements = elements;
+
+            selectedTest(obj);
 
         end
 
@@ -220,6 +246,46 @@ classdef mainGUI < handle
             sheets = sheetnames(obj.excelName);
             obj.excelData = readtable(obj.excelName,"Sheet",sheets(index),"VariableNamingRule","preserve");
             obj.UIelements.misc.excelTable.Data = obj.excelData;
+        end
+
+        function selectedTest(obj)
+            obj.activeTest = obj.UIelements.misc.dataDrpDwn.Value;
+            str = strjoin(["Updating selected test to",obj.activeTest]);
+            disp(str);
+            [~,idx] = max(strcmp(obj.excelData.Experiment(:),"RK-01-91-1"));
+            obj.activeTestInfo = obj.excelData(idx,:);
+            obj.activeTestname = strrep(obj.activeTestInfo.Resin{1}," ","");
+            obj.activeTestOrder = obj.fntOrder.(obj.activeTestname);
+
+            %Loop to create the updating test selection
+            for i=1:size(obj.activeTestOrder.order,2)
+                UI.ckbox(i) = uicheckbox(obj.UIGrids.midL,"Value",1,"Text",...
+                    "");
+                UI.ckbox(i).Layout.Row = i+1;
+                UI.ckbox(i).Layout.Column = 1;
+
+                UI.lbl(i) = uilabel(obj.UIGrids.midL,"Text",...
+                    obj.activeTestOrder.order(i),"FontSize",...
+                    obj.fontSz.bodyFontSize,"FontWeight","bold",...
+                    "HorizontalAlignment","center");
+                UI.lbl(i).Layout.Row = i+1;
+                UI.lbl(i).Layout.Column = 2;
+
+                UI.status(i) = uilabel(obj.UIGrids.midL,"Text",...
+                    "N/A","FontSize",...
+                    obj.fontSz.bodyFontSize,"FontWeight","bold",...
+                    "HorizontalAlignment","center");
+                UI.status(i).Layout.Row = i+1;
+                UI.status(i).Layout.Column = 3;
+            end
+
+            %Add UI elements to the property.
+            obj.progUI = UI;
+        end
+
+        function runFunctions(obj)
+            disp("Checking selected functions")
+            
         end
 
         function delete(obj)
