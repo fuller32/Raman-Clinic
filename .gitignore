@@ -11,3 +11,5 @@
 *.png
 #Ignore Diary
 diaryLog
+#Ignore Excels
+*.xlsx

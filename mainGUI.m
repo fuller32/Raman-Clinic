@@ -25,10 +25,12 @@ classdef mainGUI < handle
 %}
     properties
         versionCtrl
+        excelName = "Copy of Kinetics Experiments.xlsx";
         fontSz
         figure
         UIGrids
         UIelements
+        excelData
     end
     
     methods
@@ -89,8 +91,25 @@ classdef mainGUI < handle
             grids.midGrid = uigridlayout(grids.mainGrid,[1,2]);
             grids.midGrid.Layout.Row = 2;
             grids.midGrid.ColumnWidth = {'.75x','1x'};
-            uibutton(grids.midGrid);
-            uibutton(grids.midGrid);
+                %Grid that will hold the plots
+                grids.midR = uigridlayout(grids.midGrid,[2,1]);
+                grids.midR.Layout.Column = 2;
+                grids.midR.Layout.Row = 1;
+                grids.midR.RowHeight = {'1x','.15x'};
+                uibutton(grids.midR);
+                uibutton(grids.midR);
+                %Grid that will hold test selection
+                    %Size will change depending on test selected
+                grids.midL = uigridlayout(grids.midGrid,[4,3]);
+                grids.midL.RowHeight = {'fit'};
+                grids.midL.Layout.Column = 1;
+                grids.midL.Layout.Row = 1;
+
+            %Bottom Grid
+            grids.bottomGrid = uigridlayout(grids.mainGrid,[3,2]);
+            grids.bottomGrid.Layout.Row = 3;
+            grids.bottomGrid.ColumnWidth = {'1x','1x'};
+            grids.bottomGrid.RowHeight = {'.15x','1x','.15x'};
             obj.UIGrids = grids;
         end
 
@@ -104,11 +123,12 @@ classdef mainGUI < handle
 
             %Load grids as local variables to make calls shorter.
             tgrid = obj.UIGrids.topGrid;
-            midgrid = obj.UIGrids.midGrid;
-            mgrid = obj.UIGrids.mainGrid;
+            mLgrid = obj.UIGrids.midL;
+            mRgrid = obj.UIGrids.midR;
+            bgrid = obj.UIGrids.bottomGrid;
 
             %Top Grid
-                %School logo top left
+                %Logo top left
                 misc.logo = uiimage(tgrid,"ImageSource","RowanLogo.png");
                 misc.logo.Layout.Column = 1;
 
@@ -125,6 +145,81 @@ classdef mainGUI < handle
                     'HorizontalAlignment',"center","FontWeight",'bold');
                 labels.gitLbl.Layout.Column = 3;
 
+            %Bottom Grid
+                %Read in excel data
+                sheets = sheetnames(obj.excelName);
+                %Assume sheet 3 for now
+                obj.excelData = readtable(obj.excelName,"Sheet",sheets(3),"VariableNamingRule","preserve");
+                %Drop down of all tabs in excel
+                misc.excelDrpDwn = uidropdown(bgrid,"Items",sheets,...
+                    "Value",sheets(3),"FontSize",obj.fontSz.subheadingFontSize,...
+                    "ValueChangedFcn",@(h,e)updateTable(obj));
+                misc.excelDrpDwn.Layout.Row = 3;
+                misc.excelDrpDwn.Layout.Column = 1;
+                %Table to hold excel data
+                misc.excelTable = uitable(bgrid,"Data",obj.excelData);
+                misc.excelTable.Layout.Row = 2;
+                misc.excelTable.Layout.Column = [1 2];
+
+                %Get a dropdown of all the subfolders in Data
+                folders = dir("Data\");
+                subFolders = folders([folders(:).isdir]);
+                subFolders = subFolders(~ismember({subFolders(:).name},{'.','..'}));
+                subFolders = {subFolders.name};
+                misc.dataDrpDwn = uidropdown(bgrid,"Items",subFolders,...
+                    "FontSize",obj.fontSz.subheadingFontSize);
+                misc.dataDrpDwn.Layout.Row = 3;
+                misc.dataDrpDwn.Layout.Column = 2;
+
+                %Create buttons
+                buttons.runBtn = uibutton(bgrid,"Text","Run Selected Functions",...
+                    "FontSize",obj.fontSz.subheadingFontSize);
+                buttons.runBtn.Layout.Row = 1;
+                buttons.runBtn.Layout.Column = 1;
+
+                buttons.settingsBtn = uibutton(bgrid,"Text","Settings",...
+                    "FontSize",obj.fontSz.subheadingFontSize);
+                buttons.settingsBtn.Layout.Row = 1;
+                buttons.settingsBtn.Layout.Column = 2;
+            
+
+            %Middle Grid
+            %Left side
+                labels.checkLbl = uilabel(mLgrid,"Text","Enable Function",...
+                    "FontSize",obj.fontSz.subheadingFontSize,"FontWeight","bold",...
+                    "HorizontalAlignment","center");
+                labels.checkLbl.Layout.Row = 1;
+                labels.checkLbl.Layout.Column = 1;
+
+                labels.fnNameLbl = uilabel(mLgrid,"Text","Function Name",...
+                    "FontSize",obj.fontSz.subheadingFontSize,"FontWeight","bold",...
+                    "HorizontalAlignment","center");
+                labels.fnNameLbl.Layout.Row = 1;
+                labels.fnNameLbl.Layout.Column = 2;
+
+                labels.statusLbl = uilabel(mLgrid,"Text","Function Status",...
+                    "FontSize",obj.fontSz.subheadingFontSize,"FontWeight","bold",...
+                    "HorizontalAlignment","center");
+                labels.statusLbl.Layout.Row = 1;
+                labels.statusLbl.Layout.Column = 3;
+
+            %Collect UI elements
+            elements.misc = misc;
+            elements.labels = labels;
+            elements.buttons = buttons;
+
+            %Write UI elements to class property
+            obj.UIelements = elements;
+
+        end
+
+        function updateTable(obj)
+            disp("Updating excel table")
+            index = strmatch(obj.UIelements.misc.excelDrpDwn.Value,...
+                obj.UIelements.misc.excelDrpDwn.Items);
+            sheets = sheetnames(obj.excelName);
+            obj.excelData = readtable(obj.excelName,"Sheet",sheets(index),"VariableNamingRule","preserve");
+            obj.UIelements.misc.excelTable.Data = obj.excelData;
         end
 
         function delete(obj)
