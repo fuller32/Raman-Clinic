@@ -285,7 +285,20 @@ classdef mainGUI < handle
 
         function runFunctions(obj)
             disp("Checking selected functions")
-            
+            numTests = size(obj.progUI.ckbox,2);
+            idx = zeros(numTests,1);
+            for i = 1:numTests
+                idx(i) = obj.progUI.ckbox(i).Value;
+            end
+
+            disp("Starting test cycle")
+            for i = 1:numTests
+                if idx(i) == 1
+                    str = strjoin(["Running",obj.activeTestOrder.order(i)]);
+                    disp(str);
+                end
+            end
+            disp("Completed test cycle")
         end
 
         function delete(obj)
