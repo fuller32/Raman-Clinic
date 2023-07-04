@@ -1,10 +1,10 @@
-function main
+function GUI = main
 %{
     Function Name:              main.m
     Date of origination:        7/3/2023
     Programmer:                 Seamus Fullerton
     Organizations:              Rowan University,
-                                Advanced Materials and Manufactoring
+                                Advanced Materials and Manufacturing 
                                 Institute (AMMI)
     
     Description:
@@ -16,6 +16,14 @@ function main
 
     Rev "-": Initial release of the code            Seamus Fullerton 
 %}
+    %Create Diary to log matlab output for troubleshooting.
+    if exist("diaryLog","file")
+        delete("diaryLog")
+        diary diaryLog
+    else
+        diary diaryLog
+    end
+
     disp("Adding folders to matlab path");
     %Verify if the code is compiled. Avoids issues if the code ever gets
     %compiled into an executable.
@@ -23,9 +31,10 @@ function main
     if x == false
         addpath(genpath("Data\"),...
             genpath("MatLab Functions"),...
-            "Plots\");
+            "Plots\",...
+            genpath("Documents"));
     end
     disp("Starting main GUI");
-    mainGUI;
+    GUI = mainGUI;
 end
 

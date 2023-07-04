@@ -9,3 +9,5 @@
 *.mat
 #Don't upload images
 *.png
+#Ignore Diary
+diaryLog

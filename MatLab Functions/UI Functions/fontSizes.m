@@ -4,7 +4,7 @@ function [fntSz] = fontSizes(screenHeight,screenWidth)
     Date of origination:        7/3/2023
     Programmer:                 Seamus Fullerton
     Organizations:              Rowan University,
-                                Advanced Materials and Manufactoring
+                                Advanced Materials and Manufacturing 
                                 Institute (AMMI)
     
     Description:
