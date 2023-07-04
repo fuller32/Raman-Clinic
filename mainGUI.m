@@ -37,7 +37,7 @@ classdef mainGUI < handle
         activeTestname
         activeTestOrder
         progUI
-        filePath
+        savefilePath
     end
     
     methods
@@ -284,7 +284,15 @@ classdef mainGUI < handle
         end
 
         function runFunctions(obj)
-            disp("Checking selected functions")
+            disp("Setting up folders");
+            obj.savefilePath = fullfile(cd,"Results",obj.activeTest);
+            if exist(obj.savefilePath,"dir")<1
+                mkdir(obj.savefilePath);
+                mkdir(fullfile(obj.savefilePath,"Plots"));
+                mkdir(fullfile(obj.savefilePath,"Variables"));
+                mkdir(fullfile(obj.savefilePath,"Reports"));
+            end
+            disp("Checking selected functions");
             numTests = size(obj.progUI.ckbox,2);
             idx = zeros(numTests,1);
             for i = 1:numTests
@@ -296,6 +304,7 @@ classdef mainGUI < handle
                 if idx(i) == 1
                     str = strjoin(["Running",obj.activeTestOrder.order(i)]);
                     disp(str);
+                    feval(obj.activeTestOrder.order(i),obj);
                 end
             end
             disp("Completed test cycle")

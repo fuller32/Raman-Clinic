@@ -1,9 +1,6 @@
 % file to read in Ocean Optics multiple spectrometer files, average scans and save
 % as .csv.
-function [data] = read_Ondax_files
-
-clear all
-
+function [data] = read_Ondax_files(obj)
 % % choose files to convert
 % [filename, pathname]=uigetfile('*.csv','MultiSelect','on');
 % if ~iscell(filename) && ischar(filename)
@@ -13,12 +10,14 @@ clear all
 %Changed to be directory select to avoid windows issue with large dataset
 %selection
 
-rootPath = uigetdir;
 %Create regexp
+rootPath = fullfile(cd,"Data",obj.activeTest);
 csvRegExp = fullfile(rootPath,'my*.csv'); %Add my so we don't include _my file
 csvFiles = dir(csvRegExp);
 
-for ii=1:length(csvFiles)
+fullLength = length(csvFiles);
+
+for ii=1:fullLength
     
    c=dlmread(fullfile(rootPath,csvFiles(ii).name),',',2,0);
       if ii==1
@@ -29,7 +28,8 @@ for ii=1:length(csvFiles)
       end
   % Added so I can see where we are in the loop.
   if mod(ii,10000) == 0
-      disp(ii);
+      str = sprintf("%i of %i processed",ii,fullLength);
+      disp(str);
   end
 end
 
