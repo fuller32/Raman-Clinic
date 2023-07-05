@@ -16,6 +16,7 @@ csvRegExp = fullfile(rootPath,'my*.csv'); %Add my so we don't include _my file
 csvFiles = dir(csvRegExp);
 
 fullLength = length(csvFiles);
+progBar = uiprogressdlg(obj.figure,"Title","Reading in Ondax files");
 
 for ii=1:fullLength
     
@@ -27,13 +28,21 @@ for ii=1:fullLength
           data(:,ii+1)=c(:,2);
       end
   % Added so I can see where we are in the loop.
-  if mod(ii,10000) == 0
-      str = sprintf("%i of %i processed",ii,fullLength);
-      disp(str);
-  end
-end
+  progBar.Value = ii/fullLength;
 
-dlmwrite(fullfile(rootPath,['_',csvFiles(ii).name(1:end-4),'.csv']),data,'precision','%f');
+end
+disp("Succesfully read in all CSVs.")
+delete(progBar);
+str = strjoin(["Writing out compiled CSV to",fullfile(obj.savefilePath,"Variables")]);
+disp(str)
+savePath = fullfile(obj.savefilePath,"Variables",['_',csvFiles(ii).name(1:end-4),'.csv']);
+
+progBar = uiprogressdlg(obj.figure,"Title","Writing out Ondax files",...
+    "Indeterminate","on");
+writematrix(data,savePath); %Significantly faster and uses less memory
+delete(progBar);
+str = strjoin(["Succesfully wrote compiled CSV to",fullfile(obj.savefilePath,"Variables")]);
+disp(str);
 
 % if length(filename)>1
 %     average_data(:,1)=data(:,1);

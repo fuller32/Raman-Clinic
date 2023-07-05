@@ -38,6 +38,7 @@ classdef mainGUI < handle
         activeTestOrder
         progUI
         savefilePath
+        interupt = 1;
     end
     
     methods
@@ -266,7 +267,7 @@ classdef mainGUI < handle
 
                 UI.lbl(i) = uilabel(obj.UIGrids.midL,"Text",...
                     obj.activeTestOrder.order(i),"FontSize",...
-                    obj.fontSz.bodyFontSize,"FontWeight","bold",...
+                    obj.fontSz.bodyFontSize,...
                     "HorizontalAlignment","center");
                 UI.lbl(i).Layout.Row = i+1;
                 UI.lbl(i).Layout.Column = 2;
@@ -300,14 +301,44 @@ classdef mainGUI < handle
             end
 
             disp("Starting test cycle")
+            numOfselTests = sum(idx);
+            tests = 0;
+            response = "Yes";
             for i = 1:numTests
                 if idx(i) == 1
+                    tests = tests+1;
                     str = strjoin(["Running",obj.activeTestOrder.order(i)]);
                     disp(str);
                     feval(obj.activeTestOrder.order(i),obj);
+                    str = strjoin(["Completed",obj.activeTestOrder.order(i)]);
+                    disp(str)
+                    if obj.interupt == 1 && tests~=numOfselTests
+                        response = questdlg('Continue with next function?',...
+                            'Interupt test','Yes','No','Yes');
+                        switch response
+                            case "Yes"
+                            case "No"
+                                break
+                        end
+                    end
                 end
             end
-            disp("Completed test cycle")
+
+            if strcmp(response,"No")==1 && obj.interupt == 1
+                disp("Test cycle was interupted by user")
+            else
+                disp("Completed test cycle")
+            end
+            %Write Git version out
+            str = strjoin(["Writing GIT version to",fullfile(obj.savefilePath,"Reports")]);
+            disp(str);
+            fileID = fopen(fullfile(obj.savefilePath,"Reports","GIT_Version.txt"),"w");
+            fprintf(fileID,"%s",obj.versionCtrl);
+            fclose(fileID);
+
+            str = strjoin(["Writing diary log out to",fullfile(obj.savefilePath,"Reports")]);
+            disp(str)
+            copyfile("diaryLog",fullfile(obj.savefilePath,"Reports"))
         end
 
         function delete(obj)
