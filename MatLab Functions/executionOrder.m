@@ -21,7 +21,12 @@ function codeOrder = executionOrder
     Epon828.order = ["read_Ondax_files",...
                     "Epoxy_Raman_Cure",...
                     "LA_Raman_Cure"];
-
+    Epon828.Epoxy_Ramen_Cure.settings = {'','','','0','0','1000','.1','1',...
+        '.01','0.01','1','0.01','1','10','.1'};         
+    %Mat-File,StartTime,StopTime,TimeLowerlimit,TimeUpperlimit,Lambda,/alpha_u
+    %Min Value','/alpha_u Max Value','/alpha_u Step Size','k Min Value',
+    % k Max Value','k Step Size','n Min Value','n Max Value','n Step Size'
+    
     %Include the different setups into the return (Right now it is only
     %Epon828 need a better understanding of what needs to be ran for the
     %other resins.)

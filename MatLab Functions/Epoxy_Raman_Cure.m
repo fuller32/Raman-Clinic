@@ -1,33 +1,31 @@
-function [Data] = Epoxy_Raman_Cure
-prompt = {'MAT-File','Start Time', 'End Time','Time Lower Limit',...
-    'Time Upper Limit','Lambda'};
-dlgtitle = 'Input';
-dims = [1 35];
-definput = {'','mm-dd-yyyy HH:MM:SS','mm-dd-yyyy HH:MM:SS','0','0','1000'};
-Inputs = inputdlg(prompt,dlgtitle,dims,definput);
+function [Data] = Epoxy_Raman_Cure(obj)
 
-load(string(Inputs(1)))
-name = string(Inputs(1));
+path = fullfile(obj.savefilePath,"Variables",[obj.activeTest,'.mat']);
+
+load(path,'data');
+name = obj.activeTest;
 Figname = strrep(name,'_',' ');
 
-range = str2num(string(Inputs(4)));
+settings = obj.fntOrder.Epon828.Epoxy_Ramen_Cure.settings;
+
+range = str2num(string(settings(4)));
 RSL1 = 1000;
 RSL2 = 1300;
 
 
-[n m] = size(Db);
-RS = Db(:,1);
+[n m] = size(data);
+RS = data(:,1);
 RSL1n = findpeak(RS,RSL1);
 RSL2n = findpeak(RS,RSL2);
-I = Db(:,2:m);
+I = data(:,2:m);
 
-
-plot(RS,I)
-xlabel('Raman Shift (cm^-^1)')
-ylabel('Counts (arb.)')
-axis padded
-title(Figname)
-figure
+ramenPlot = figure;
+plot(RS,I);
+xlabel('Raman Shift (cm^-^1)');
+ylabel('Counts (arb.)');
+axis("padded");
+title(Figname);
+reducedRamen = figure;
 I = removeoutliers(I);
 I = I(RSL2n:RSL1n,:);
 RS = RS(RSL2n:RSL1n,:);
@@ -37,24 +35,24 @@ P2 = 1103;
 
 [vH vHi]=findpeak(RS,P1,7);
 [vL vLi]=findpeak(RS,P2,7);
-Lambda = str2num(string(Inputs(6)));
+Lambda = str2num(string(settings(6)));
 [I,X] = airPLS(I',Lambda);
 I=I';
 I = removeoutliers(I);
 In = I./max(I(vLi,:));
 plot(RS,In)
-xlabel('Raman Shift (cm^-^1)')
-ylabel('Counts (arb.)')
-axis padded
-title(Figname)
+xlabel('Raman Shift (cm^-^1)');
+ylabel('Counts (arb.)');
+axis("padded");
+title(Figname);
 
 
 
 
-[n m] = size(Db);
-[y, mm, d, h, mn, s]=datevec(string(Inputs(2)),'mm-dd-yyyy HH:MM:SS');
+[n m] = size(data);
+[y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Start csv")));
 Ti = 1440*d+60*h+mn+s/60;
-[y, mm, d, h, mn, s]=datevec(string(Inputs(3)),'mm-dd-yyyy HH:MM:SS');
+[y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Stop csv")));
 Tf = 1440*d+60*h+mn+s/60;
 Tmax = Tf-Ti;
 
@@ -78,20 +76,15 @@ title({Figname, 'Extent of Cure Kinetics'})
 
 hold off
 
-range = str2num(string(Inputs(5)))- str2num(string(Inputs(4)));
+range = str2num(string(settings(5)))- str2num(string(settings(4)));
 
 if range == 0
 else
-    T = T(1+str2num(string(Inputs(4))):str2num(string(Inputs(5))));
-    alpha = alpha(1+str2num(string(Inputs(4))):str2num(string(Inputs(5))));
+    T = T(1+str2num(string(settings(4))):str2num(string(settings(5))));
+    alpha = alpha(1+str2num(string(settings(4))):str2num(string(settings(5))));
 end
 
-prompt = {'/alpha_u Min Value','/alpha_u Max Value','/alpha_u Step Size',...
-    'k Min Value','k Max Value','k Step Size','n Min Value','n Max Value','n Step Size'};
-dlgtitle = 'Input';
-dims = [1 35];
-definput = {'.1','1','.01','0.01','1','0.01','1','10','.1'};
-Fitp = inputdlg(prompt,dlgtitle,dims,definput);
+Fitp = obj.fntOrder.Epon828.Epoxy_Ramen_Cure.settings(7:end);
 
 a = str2num(char(Fitp(1))):str2num(char(Fitp(3))):str2num(char(Fitp(2)));
 k = str2num(char(Fitp(4))):str2num(char(Fitp(6))):str2num(char(Fitp(5)));
@@ -117,9 +110,11 @@ s = {['\alpha_u = ' num2str(fitparams.au)]...
 text(max(T)*.7,.1,s)
 R = [alpha;T];
 if range == 0
-    writematrix(R,'Epoxy' + name + '_full_range.csv')
+    path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_full_range.csv']);
+    writematrix(R,path);
 else
-    writematrix(R,'Epoxy' + name + '_'+ num2str(range)+ 's.csv')
+    path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_',num2str(range),'s.csv']);
+    writematrix(R,path);
 end
 %Updated 6/28/2023 SF
 %Have the save function set to version -7.3 to allow for variables of size
@@ -127,10 +122,12 @@ end
 
 comp = mexext;
 if 1 == strcmp(comp,'mexw64')
-    save('Epoxy' + name + '_' + num2str(range) + 's_fitparameters','fitparams','-v7.3');
+    path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_',num2str(range),'s_fitparameters']);
+    save(path,'fitparams','-v7.3');
 else
     disp("Your machine is 32-bit and may have issues with saving matlab variables greater then 2GB")
-    save('Epoxy' + name + '_' + num2str(range) + 's_fitparameters','fitparams');
+    path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_',num2str(range),'s_fitparameters']);
+    save(path,'fitparams');
 end
 
 end

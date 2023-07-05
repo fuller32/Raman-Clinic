@@ -33,15 +33,19 @@ for ii=1:fullLength
 end
 disp("Succesfully read in all CSVs.")
 delete(progBar);
-str = strjoin(["Writing out compiled CSV to",fullfile(obj.savefilePath,"Variables")]);
+str = strjoin(["Writing out variables to",fullfile(obj.savefilePath,"Variables")]);
 disp(str)
 savePath = fullfile(obj.savefilePath,"Variables",['_',csvFiles(ii).name(1:end-4),'.csv']);
 
-progBar = uiprogressdlg(obj.figure,"Title","Writing out Ondax files",...
+progBar = uiprogressdlg(obj.figure,"Title","Writing out Ondax variables",...
     "Indeterminate","on");
 writematrix(data,savePath); %Significantly faster and uses less memory
+
+savePath = fullfile(obj.savefilePath,"Variables",[obj.activeTest,'.mat']);
+save(savePath,'data','-v7.3')
+
 delete(progBar);
-str = strjoin(["Succesfully wrote compiled CSV to",fullfile(obj.savefilePath,"Variables")]);
+str = strjoin(["Succesfully wrote variables to",fullfile(obj.savefilePath,"Variables")]);
 disp(str);
 
 % if length(filename)>1
