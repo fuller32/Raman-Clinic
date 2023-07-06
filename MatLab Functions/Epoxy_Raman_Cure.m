@@ -11,6 +11,9 @@ plotSavePath = fullfile(obj.savefilePath,"Plots");
 
 settings = obj.fntOrder.Epon828.Epoxy_Raman_Cure.settings;
 
+progBar = uiprogressdlg(obj.figure,"Title","Creating Plots",...
+    "Indeterminate","on");
+
 range = str2num(string(settings(4)));
 RSL1 = 1000;
 RSL2 = 1300;
@@ -108,16 +111,17 @@ a = str2num(char(Fitp(1))):str2num(char(Fitp(3))):str2num(char(Fitp(2)));
 k = str2num(char(Fitp(4))):str2num(char(Fitp(6))):str2num(char(Fitp(5)));
 n = str2num(char(Fitp(7))):str2num(char(Fitp(9))):str2num(char(Fitp(8)));
 
+delete(progBar);
 
 disp("Calculating fit may take awhile to complete")
-[fitparams, sse] = stepfittingreactionkinetics(T',alpha',a,k,n,0);
+[fitparams, sse] = stepfittingreactionkinetics(T',alpha',a,k,n,0,obj);
 
 a = fitparams.au;
 k = fitparams.k;
 n = fitparams.n;
 disp("Creating Cure Kinetics Fit Plot")
 kineticsFit = figure;
-[fitparams, sse] = stepfittingreactionkinetics(T',alpha',a,k,n,1);
+[fitparams, sse] = stepfittingreactionkinetics(T',alpha',a,k,n,1,obj);
 disp("Fit calculated may take awhile to complete")
 axis padded
 xlabel('Time (s)')
@@ -129,10 +133,12 @@ s = {['\alpha_u = ' num2str(fitparams.au)]...
     ['SSE = ' num2str(sse)]};
 disp(s)
 text(max(T)*.7,.1,s)
-
+delete(progBar);
 str = strjoin(["Saving Cure Kinetics Fit Plot",fullfile(plotSavePath,'Cure_Kinetics_Fit.png')]);
 disp(str)
 saveas(kineticsFit,fullfile(plotSavePath,'Cure_Kinetics_Fit.png'));
+progBar = uiprogressdlg(obj.figure,"Title","Saving Files",...
+    "Indeterminate","on");
 
 R = [alpha;T];
 if range == 0
@@ -155,5 +161,6 @@ else
     path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_',num2str(range),'s_fitparameters','settings']);
     save(path,'fitparams');
 end
+delete(progBar);
 
 end

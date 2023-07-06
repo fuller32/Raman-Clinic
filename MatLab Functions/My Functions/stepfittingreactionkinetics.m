@@ -1,5 +1,5 @@
 function [fitparams, sse] = stepfittingreactionkinetics(time,conversion,...
-                        ultimateConversion,rateConstant,reactionOrder,p)
+                        ultimateConversion,rateConstant,reactionOrder,p,obj)
                     
 %% explanation of terms
 % fitparams - fitting result
@@ -30,10 +30,14 @@ au = ultimateConversion;
 k = rateConstant;
 n = reactionOrder;
 
-sse = zeros(length(au),length(k),length(n)); 
+sse = zeros(length(au),length(k),length(n));
 
-tic
-for i1 = 1:length(au)
+
+progBar = uiprogressdlg(obj.figure,"Title","Calculating Fit (May take awhile)");
+
+loopSize = length(au);
+for i1 = 1:loopSize
+    tic
     for i2 = 1:length(k)
         for i3 = 1:length(n)
             switch n(i3)
@@ -46,8 +50,16 @@ for i1 = 1:length(au)
             end
         end
     end
+    %Estimate time for user
+    elapsed = toc;
+    remaining = loopSize-i1;
+    estimatedTime = elapsed*remaining;
+    predictedTime = string(datetime+seconds(estimatedTime));
+    str = strjoin(["Estimated time remaining",estimatedTime,"seconds. Predicted to be completed at",...
+        predictedTime]);
+    progBar.Message = str;
+    progBar.Value = i1/loopSize;
 end
-toc
 
 [minsse,loc] = min(sse(:));
 [i1,i2,i3] = ind2sub(size(sse),loc);
