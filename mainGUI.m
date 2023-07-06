@@ -191,7 +191,8 @@ classdef mainGUI < handle
                 buttons.runBtn.Layout.Column = 1;
 
                 buttons.settingsBtn = uibutton(bgrid,"Text","Settings",...
-                    "FontSize",obj.fontSz.subheadingFontSize);
+                    "FontSize",obj.fontSz.subheadingFontSize,"ButtonPushedFcn",...
+                    @(h,e)settingsButton(obj));
                 buttons.settingsBtn.Layout.Row = 1;
                 buttons.settingsBtn.Layout.Column = 2;
             
@@ -339,6 +340,35 @@ classdef mainGUI < handle
             str = strjoin(["Writing diary log out to",fullfile(obj.savefilePath,"Reports")]);
             disp(str)
             copyfile("diaryLog",fullfile(obj.savefilePath,"Reports"))
+        end
+
+        function settingsButton(obj)
+            disp("Settings button selected");
+            avalTests = [{'General'},obj.activeTestOrder.order];
+            idx = listdlg("ListString",avalTests,"SelectionMode","single",...
+                "Name","Settings Selection");
+            selection = avalTests{idx};
+            if strcmp(selection,'General') == 1
+                disp("Opening general settings");
+                prompt = {'Interupt Between Functions:'};
+                settings = {int2str(obj.interupt)};
+                box = inputdlg(prompt,"Settings",[1,35],settings);
+                obj.interupt = str2double(box{1});
+            else
+                try
+                    str = strjoin(["Opening",selection,"settings"]);
+                    disp(str);
+                    act = obj.activeTestOrder.(selection);
+                    prompt = act.prompt;
+                    settings = act.settings;
+                    box = inputdlg(prompt,"Settings",[1,35],settings);
+                    obj.fntOrder.(obj.activeTestname).(selection).settings = box;
+                catch
+                    str = strjoin(["No setting options for",selection]);
+                    disp(str)
+                    return
+                end
+            end
         end
 
         function delete(obj)

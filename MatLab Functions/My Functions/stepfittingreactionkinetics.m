@@ -82,3 +82,4 @@ fitparams.n = n;
 
 fitparams.gof.sse = minsse;
 fitparams.gof.meanSE = minsse/length(a0)*100;
+end
