@@ -1,9 +1,9 @@
 function [Data] = LA_Raman_Cure
 prompt = {'MAT-File','Start Time', 'End Time','Time Lower Limit',...
-    'Time Upper Limit','Lambda'};
+    'Time Upper Limit','Baseline Fit Order'};
 dlgtitle = 'Input';
 dims = [1 35];
-definput = {'','mm-dd-yyyy HH:MM:SS','mm-dd-yyyy HH:MM:SS','0','0','100000'};
+definput = {'','mm-dd-yyyy HH:MM:SS','mm-dd-yyyy HH:MM:SS','0','0','0'};
 Inputs = inputdlg(prompt,dlgtitle,dims,definput);
 
 load(string(Inputs(1)))
@@ -22,26 +22,33 @@ RSL2n = findpeak(RS,RSL2);
 I = Db(:,2:m);
 
 
-plot(RS,I)
-xlabel('Raman Shift (cm^-^1)')
-ylabel('Counts (arb.)')
-axis padded
-title(Figname)
+
 figure
 I = removeoutliers(I);
 I = I(RSL2n:RSL1n,:);
 RS = RS(RSL2n:RSL1n,:);
 
 
-Lambda = str2num(string(Inputs(6)));
-% [RS I] = LF_Background(RS,I);
+
 P1 = 14;
 P2 = 85;
 
 [vH vHi]=findpeak(RS,P1,3);
 [vL vLi]=findpeak(RS,P2,7);
-% I=I-y;
-I = removeoutliers(I);
+[q w] = size(I);
+if str2num(string(Inputs(6))) ~= 0
+    F = ones(size(I)); 
+    for i = 1:m-1
+        P = [I(1,i)  I(143,i) I(144,i)  I(286,i)];
+        PR = [RS(1)  RS(143) RS(144)  RS(286)];
+        X = polyfit(PR,P,str2num(string(Inputs(6))));
+        F(:,i) = polyval(X,RS);
+    end
+    I = I-F;
+elseif str2num(string(Inputs(6))) == 0
+    I = I;
+end
+
 In = I./max(I(vLi,:));
 plot(RS,In)
 xlabel('Raman Shift (cm^-^1)')
@@ -62,10 +69,10 @@ Tmax = Tf-Ti;
 dt = 60*Tmax/(m-1);
 t =1:m-1;
 T = t*dt;
-figure
-[X Y] = meshgrid(T,RS);
-surf(X,Y, I./max(I(vLi,:)))
-axis([0 60 1590 1650 0 1.1])
+% figure
+% [X Y] = meshgrid(T,RS);
+% surf(X,Y, I./max(I(vLi,:)))
+% axis([0 60 1590 1650 0 1.1])
 
 
 figure
@@ -123,15 +130,6 @@ else
     writematrix(R,name + '_LA_'+ num2str(range)+ 's.csv')
 end
 
-%Updated 6/28/2023 SF
-%Have the save function set to version -7.3 to allow for variables of size
-%>=2GB. Needs to be a 64 bit machine to work so check has been added.
 
-comp = mexext;
-if 1 == strcmp(comp,'mexw64')
-    save(name + '_LA_' + num2str(range) + 's_fitparameters','fitparams','-v7.3');
-else
-    disp("Your machine is 32-bit and may have issues with saving matlab variables greater then 2GB")
-    save(name + '_LA_' + num2str(range) + 's_fitparameters','fitparams');
-end
+save(name + '_LA_' + num2str(range) + 's_fitparameters','fitparams')
 end
