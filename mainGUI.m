@@ -39,6 +39,7 @@ classdef mainGUI < handle
         progUI
         savefilePath
         interupt = 1;
+        savePlotFigs = 0;
     end
     
     methods
@@ -291,6 +292,7 @@ classdef mainGUI < handle
             if exist(obj.savefilePath,"dir")<1
                 mkdir(obj.savefilePath);
                 mkdir(fullfile(obj.savefilePath,"Plots"));
+                mkdir(fullfile(obj.savefilePath,"Plots","Figures"));
                 mkdir(fullfile(obj.savefilePath,"Variables"));
                 mkdir(fullfile(obj.savefilePath,"Reports"));
             end
@@ -350,10 +352,11 @@ classdef mainGUI < handle
             selection = avalTests{idx};
             if strcmp(selection,'General') == 1
                 disp("Opening general settings");
-                prompt = {'Interupt Between Functions:'};
-                settings = {int2str(obj.interupt)};
+                prompt = {'Interupt Between Functions:','Enable Saving of Plot Figures(Will increase file sizes and runtime)'};
+                settings = {int2str(obj.interupt),int2str(obj.savePlotFigs)};
                 box = inputdlg(prompt,"Settings",[1,35],settings);
                 obj.interupt = str2double(box{1});
+                obj.savePlotFigs = str2double(box{2});
             else
                 try
                     str = strjoin(["Opening",selection,"settings"]);

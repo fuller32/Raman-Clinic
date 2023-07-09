@@ -8,6 +8,7 @@ name = obj.activeTest;
 Figname = strrep(name,'_',' ');
 
 plotSavePath = fullfile(obj.savefilePath,"Plots");
+figureSavePath = fullfile(plotSavePath,"Figures");
 
 settings = obj.fntOrder.Epon828.Epoxy_Raman_Cure.settings;
 
@@ -73,15 +74,15 @@ Tmax = Tf-Ti;
 dt = 60*Tmax/(m-1);
 t =1:m-1;
 T = t*dt;
-disp("Creating Surface Plot")
-surfPlot = figure;
-[X Y] = meshgrid(T,RS);
-surf(X,Y, I./max(I(vLi,:)))
-%axis([0 60 1590 1650 0 1.1]) Commented out since current frame removes all
-%data.
-str = strjoin(["Saving Surface Plot",fullfile(plotSavePath,'Surf_Plot.png')]);
-disp(str)
-saveas(surfPlot,fullfile(plotSavePath,'Surf_Plot.png'));
+% disp("Creating Surface Plot")
+% surfPlot = figure;
+% [X Y] = meshgrid(T,RS);
+% surf(X,Y, I./max(I(vLi,:)))
+% %axis([0 60 1590 1650 0 1.1]) Commented out since current frame removes all
+% %data.
+% str = strjoin(["Saving Surface Plot",fullfile(plotSavePath,'Surf_Plot.png')]);
+% disp(str)
+% saveas(surfPlot,fullfile(plotSavePath,'Surf_Plot.png'));
 
 disp("Creating Cure Kinetics Plot")
 cureKinetics = figure;
@@ -114,22 +115,30 @@ n = str2num(char(Fitp(7))):str2num(char(Fitp(9))):str2num(char(Fitp(8)));
 delete(progBar);
 
 disp("Calculating fit may take awhile to complete")
-[fitparams, sse] = stepfittingreactionkinetics(T',alpha',a,k,n,0,obj);
-
-a = fitparams.au;
-k = fitparams.k;
-n = fitparams.n;
+progBar = uiprogressdlg(obj.figure,"Title","Calculating Fit","Indeterminate","on");
+lowerValues = [str2double(settings{7}) str2double(settings{10}) str2double(settings{13})];
+upperValues = [str2double(settings{8}) str2double(settings{11}) str2double(settings{14})];
+%[fitparams, gof] = stepfittingreactionkinetics(T',alpha',a,k,n,0,obj);
+[fitparams, gof] = stepfittingreactionkinetics_NLLS(T,alpha,lowerValues,upperValues);
+sse = gof.sse;
+results = fitparams;
+delete(progBar);
+disp("Fit calculated")
+a = results(1);
+k = results(2);
+n = results(3);
 disp("Creating Cure Kinetics Fit Plot")
 kineticsFit = figure;
-[fitparams, sse] = stepfittingreactionkinetics(T',alpha',a,k,n,1,obj);
-disp("Fit calculated may take awhile to complete")
+%[fitparams, sse] = stepfittingreactionkinetics(T',alpha',a,k,n,1,obj);
+plot(fitparams,T,alpha)
+legend("off");
 axis padded
 xlabel('Time (s)')
 ylabel('Conversion')
 title({Figname, 'Extent of Cure Kinetics'})
-s = {['\alpha_u = ' num2str(fitparams.au)]...
-    ['k = ' num2str(fitparams.k)] ...
-    ['n = ' num2str(fitparams.n)]...
+s = {['\alpha_u = ' num2str(a)]...
+    ['k = ' num2str(k)] ...
+    ['n = ' num2str(n)]...
     ['SSE = ' num2str(sse)]};
 disp(s)
 text(max(T)*.7,.1,s)
@@ -162,5 +171,46 @@ else
     save(path,'fitparams');
 end
 delete(progBar);
+
+switch obj.savePlotFigs
+    case 0
+        disp("Setting not selected to save off plot figures")
+    case 1
+        disp("Saving Plot figures");
+        progBar = uiprogressdlg(obj.figure,"Title","Saving Plot Figures");
+        progBar.Message = "Saving Raman Plot";
+        disp("Saving Raman Plot");
+        saveLoc = fullfile(figureSavePath,"Raman_Plot.fig");
+        str = strjoin(["Raman Plot saved at",saveLoc]);
+        savefig(RamanPlot,saveLoc,"compact");
+        disp(str);
+
+        progBar.Message = "Saving Reduced Raman Plot";
+        progBar.Value = .25;
+        disp("Saving Reduced Raman Plot");
+        saveLoc = fullfile(figureSavePath,"Reduced_Raman_Plot.fig");
+        str = strjoin(["Reduced Raman Plot saved at",saveLoc]);
+        savefig(reducedRaman,saveLoc,"compact");
+        disp(str);
+
+        progBar.Message = "Saving Cure Kinetics Plot";
+        progBar.Value = .5;
+        disp("Saving Cure Kinetics Plot");
+        saveLoc = fullfile(figureSavePath,"Cure_kinetics_Plot.fig");
+        str = strjoin(["Cure Kinetics Plot saved at",saveLoc]);
+        savefig(cureKinetics,saveLoc,"compact");
+        disp(str);
+
+        progBar.Message = "Saving Cure Kinetics Fit Plot";
+        progBar.Value = .75;
+        disp("Saving Cure Kinetics Fit Plot");
+        saveLoc = fullfile(figureSavePath,"Cure_kinetics_fit_Plot.fig");
+        str = strjoin(["Cure Kinetics Fit Plot saved at",saveLoc]);
+        savefig(kineticsFit,saveLoc,"compact");
+        disp(str);
+
+        progBar.Value = 1;
+        delete(progBar)
+end
 
 end
