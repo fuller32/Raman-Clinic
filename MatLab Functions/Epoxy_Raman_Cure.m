@@ -1,4 +1,4 @@
-function [Data] = Epoxy_Raman_Cure(obj)
+function Epoxy_Raman_Cure(obj)
 
 disp("Setting up paths")
 path = fullfile(obj.savefilePath,"Variables",[obj.activeTest,'.mat']);
@@ -114,7 +114,7 @@ n = str2num(char(Fitp(7))):str2num(char(Fitp(9))):str2num(char(Fitp(8)));
 
 delete(progBar);
 
-disp("Calculating fit may take awhile to complete")
+disp("Calculating fit")
 progBar = uiprogressdlg(obj.figure,"Title","Calculating Fit","Indeterminate","on");
 lowerValues = [str2double(settings{7}) str2double(settings{10}) str2double(settings{13})];
 upperValues = [str2double(settings{8}) str2double(settings{11}) str2double(settings{14})];
