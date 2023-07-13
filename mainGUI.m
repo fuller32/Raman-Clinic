@@ -40,6 +40,7 @@ classdef mainGUI < handle
         savefilePath
         interupt = 1;
         savePlotFigs = 0;
+        plotFileSizeLimit = 500; %Size in MBs
     end
     
     methods
@@ -352,11 +353,14 @@ classdef mainGUI < handle
             selection = avalTests{idx};
             if strcmp(selection,'General') == 1
                 disp("Opening general settings");
-                prompt = {'Interupt Between Functions:','Enable Saving of Plot Figures(Will increase file sizes and runtime)'};
-                settings = {int2str(obj.interupt),int2str(obj.savePlotFigs)};
+                prompt = {'Interupt Between Functions:','Enable Saving of Plot Figures(Will increase file sizes and runtime)',...
+                    'Maximum Figure Plot Size (Size in MB)'};
+                settings = {int2str(obj.interupt),int2str(obj.savePlotFigs),...
+                    int2str(obj.plotFileSizeLimit)};
                 box = inputdlg(prompt,"Settings",[1,35],settings);
                 obj.interupt = str2double(box{1});
                 obj.savePlotFigs = str2double(box{2});
+                obj.plotFileSizeLimit = str2double(box{3});
             else
                 try
                     str = strjoin(["Opening",selection,"settings"]);

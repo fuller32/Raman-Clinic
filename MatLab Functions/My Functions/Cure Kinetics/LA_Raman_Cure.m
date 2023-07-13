@@ -27,7 +27,7 @@ RSL2n = findpeak(RS,RSL2);
 I = data(:,2:m);
 
 disp("Creating LA Raman Plot")
-RamanPlot = figure;
+RamanPlot = figure("Visible","off");
 I = removeoutliers(I);
 I = I(RSL2n:RSL1n,:);
 RS = RS(RSL2n:RSL1n,:);
@@ -62,6 +62,8 @@ title(Figname)
 str = strjoin(["Saving  LA Raman Plot",fullfile(plotSavePath,'LA_Raman_Plot.png')]);
 disp(str);
 saveas(RamanPlot,fullfile(plotSavePath,'LA_Raman_Plot.png'))
+imageData = getframe(RamanPlot);
+imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Raman_Plot.png'));
 
 
 [n m] = size(data);
@@ -90,7 +92,8 @@ ylabel('Conversion')
 title({Figname, 'Extent of Cure Kinetics'})
 str = strjoin(["Saving Cure Kinetics Plot",fullfile(plotSavePath,'LA_Cure_Kinetics.png')]);
 disp(str)
-saveas(cureKinetics,fullfile(plotSavePath,'LA_Cure_Kinetics.png'));
+imageData = getframe(cureKinetics);
+imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Cure_Kinetics.png'));
 
 hold off
 
@@ -141,7 +144,9 @@ text(max(T)*.7,.1,s)
 delete(progBar);
 str = strjoin(["Saving LA Cure Kinetics Fit Plot",fullfile(plotSavePath,'LA_Cure_Kinetics_Fit.png')]);
 disp(str)
-saveas(kineticsFit,fullfile(plotSavePath,'LA_Cure_Kinetics_Fit.png'));
+imageData = getframe(kineticsFit);
+imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Cure_Kinetics_Fit.png'));
+
 progBar = uiprogressdlg(obj.figure,"Title","Saving Files",...
     "Indeterminate","on");
 
@@ -171,11 +176,18 @@ switch obj.savePlotFigs
         disp("Saving Plot figures");
         progBar = uiprogressdlg(obj.figure,"Title","Saving Plot Figures");
         progBar.Message = "Saving LA Raman Plot";
-        disp("Saving LA Raman Plot");
-        saveLoc = fullfile(figureSavePath,"LA_Raman_Plot.fig");
-        str = strjoin(["LA Raman Plot saved at",saveLoc]);
-        savefig(RamanPlot,saveLoc,"compact");
-        disp(str);
+        path = fullfile(obj.savefilePath,"Variables",[name,'.mat']);
+        loc = dir(path);
+        if loc.bytes < (obj.plotFileSizeLimit*1024^2*4) %Added a 4 times multipier since these are smaller.
+            disp("Saving LA Raman Plot");
+            saveLoc = fullfile(figureSavePath,"LA_Raman_Plot.fig");
+            str = strjoin(["LA Raman Plot saved at",saveLoc]);
+            savefig(RamanPlot,saveLoc,"compact");
+            disp(str);
+        else
+            str = strjoin(["Figure exceeds maximum figure size.",num2str(loc.bytes),"bytes"]);
+            disp(str);
+        end
 
         progBar.Message = "Saving LA Cure Kinetics Plot";
         progBar.Value = .33;

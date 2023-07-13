@@ -19,33 +19,46 @@ range = str2num(string(settings(4)));
 RSL1 = 1000;
 RSL2 = 1300;
 
-
+disp("1")
+tic
 [n m] = size(data);
 RS = data(:,1);
 RSL1n = findpeak(RS,RSL1);
 RSL2n = findpeak(RS,RSL2);
 I = data(:,2:m);
+toc
 
 disp("Creating Raman Plot")
-RamanPlot = figure;
+tic
+RamanPlot = figure("Visible","off");
 plot(RS,I);
 xlabel('Raman Shift (cm^-^1)');
 ylabel('Counts (arb.)');
 axis("padded");
 title(Figname);
+toc
 str = strjoin(["Saving Raman Plot",fullfile(plotSavePath,'Raman_Plot.png')]);
+tic
 disp(str)
-saveas(RamanPlot,fullfile(plotSavePath,'Raman_Plot.png'))
+imageData = getframe(RamanPlot);
+imwrite(imageData.cdata,fullfile(plotSavePath,'Raman_Plot.png'));
+toc
+
 
 disp("Creating Reduced Raman Plot")
-reducedRaman = figure;
+
+disp("2")
+tic
+reducedRaman = figure("Visible","off");
 I = removeoutliers(I);
 I = I(RSL2n:RSL1n,:);
 RS = RS(RSL2n:RSL1n,:);
-
+toc
 P1 = 1250;
 P2 = 1103;
 
+disp("3")
+tic
 [vH vHi]=findpeak(RS,P1,7);
 [vL vLi]=findpeak(RS,P2,7);
 Lambda = str2num(string(settings(6)));
@@ -53,15 +66,21 @@ Lambda = str2num(string(settings(6)));
 I=I';
 I = removeoutliers(I);
 In = I./max(I(vLi,:));
+toc
+disp("4")
+tic
 plot(RS,In)
 xlabel('Raman Shift (cm^-^1)');
 ylabel('Counts (arb.)');
 axis("padded");
 title(Figname);
+toc
 str = strjoin(["Saving Reduced Raman Plot",fullfile(plotSavePath,'Reduced_Raman.png')]);
+tic
 disp(str)
-saveas(reducedRaman,fullfile(plotSavePath,'Reduced_Raman.png'));
-
+imageData = getframe(reducedRaman);
+imwrite(imageData.cdata,fullfile(plotSavePath,'Reduced_Raman.png'));
+toc
 
 
 [n m] = size(data);
@@ -95,7 +114,8 @@ ylabel('Conversion')
 title({Figname, 'Extent of Cure Kinetics'})
 str = strjoin(["Saving Cure Kinetics Plot",fullfile(plotSavePath,'Cure_Kinetics.png')]);
 disp(str)
-saveas(cureKinetics,fullfile(plotSavePath,'Cure_Kinetics.png'));
+imageData = getframe(cureKinetics);
+imwrite(imageData.cdata,fullfile(plotSavePath,'Cure_Kinetics.png'));
 hold off
 
 range = str2num(string(settings(5)))- str2num(string(settings(4)));
@@ -145,7 +165,10 @@ text(max(T)*.7,.1,s)
 delete(progBar);
 str = strjoin(["Saving Cure Kinetics Fit Plot",fullfile(plotSavePath,'Cure_Kinetics_Fit.png')]);
 disp(str)
-saveas(kineticsFit,fullfile(plotSavePath,'Cure_Kinetics_Fit.png'));
+
+imageData = getframe(kineticsFit);
+imwrite(imageData.cdata,fullfile(plotSavePath,'Cure_Kinetics_Fit.png'));
+
 progBar = uiprogressdlg(obj.figure,"Title","Saving Files",...
     "Indeterminate","on");
 
@@ -179,19 +202,31 @@ switch obj.savePlotFigs
         disp("Saving Plot figures");
         progBar = uiprogressdlg(obj.figure,"Title","Saving Plot Figures");
         progBar.Message = "Saving Raman Plot";
-        disp("Saving Raman Plot");
-        saveLoc = fullfile(figureSavePath,"Raman_Plot.fig");
-        str = strjoin(["Raman Plot saved at",saveLoc]);
-        savefig(RamanPlot,saveLoc,"compact");
-        disp(str);
+        path = fullfile(obj.savefilePath,"Variables",[name,'.mat']);
+        loc = dir(path);
+        if loc.bytes < (obj.plotFileSizeLimit*1024^2)
+            disp("Saving Raman Plot");
+            saveLoc = fullfile(figureSavePath,"Raman_Plot.fig");
+            str = strjoin(["Raman Plot saved at",saveLoc]);
+            savefig(RamanPlot,saveLoc,"compact");
+            disp(str);
+        else
+            str = strjoin(["Data exceeds maximum figure size.",num2str(plotSize.bytes),"bytes"]);
+            disp(str);
+        end
 
         progBar.Message = "Saving Reduced Raman Plot";
         progBar.Value = .25;
-        disp("Saving Reduced Raman Plot");
-        saveLoc = fullfile(figureSavePath,"Reduced_Raman_Plot.fig");
-        str = strjoin(["Reduced Raman Plot saved at",saveLoc]);
-        savefig(reducedRaman,saveLoc,"compact");
-        disp(str);
+        if loc.bytes < (obj.plotFileSizeLimit*1024^2*10)
+            disp("Saving Reduced Raman Plot");
+            saveLoc = fullfile(figureSavePath,"Reduced_Raman_Plot.fig");
+            str = strjoin(["Reduced Raman Plot saved at",saveLoc]);
+            savefig(reducedRaman,saveLoc,"compact");
+            disp(str);
+        else
+            str = strjoin(["Figure exceeds maximum figure size.",num2str(plotSize.bytes),"bytes"]);
+            disp(str);
+        end
 
         progBar.Message = "Saving Cure Kinetics Plot";
         progBar.Value = .5;

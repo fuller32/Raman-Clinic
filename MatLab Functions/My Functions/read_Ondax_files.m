@@ -19,7 +19,7 @@ fullLength = length(csvFiles);
 progBar = uiprogressdlg(obj.figure,"Title","Reading in Ondax files");
 
 for ii=1:fullLength
-    
+   tic
    c=dlmread(fullfile(rootPath,csvFiles(ii).name),',',2,0);
       if ii==1
           data(:,1)=c(:,1);
@@ -29,7 +29,16 @@ for ii=1:fullLength
       end
   % Added so I can see where we are in the loop.
   progBar.Value = ii/fullLength;
-
+  %Check every 1000 file to predict remaining time
+  if mod(ii,1000) == 0
+    elapsed = toc;
+    remaining = fullLength-ii;
+    estimatedTime = elapsed*remaining;
+    predictedTime = string(datetime+seconds(estimatedTime));
+    str = strjoin(["Estimated time remaining",estimatedTime,"seconds. Predicted to be completed at",...
+        predictedTime]);
+    progBar.Message = str;
+  end
 end
 disp("Succesfully read in all CSVs.")
 delete(progBar);
