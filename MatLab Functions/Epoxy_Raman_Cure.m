@@ -19,68 +19,58 @@ range = str2num(string(settings(4)));
 RSL1 = 1000;
 RSL2 = 1300;
 
-disp("1")
-tic
 [n m] = size(data);
 RS = data(:,1);
 RSL1n = findpeak(RS,RSL1);
 RSL2n = findpeak(RS,RSL2);
 I = data(:,2:m);
-toc
 
 disp("Creating Raman Plot")
-tic
 RamanPlot = figure("Visible","off");
 plot(RS,I);
 xlabel('Raman Shift (cm^-^1)');
 ylabel('Counts (arb.)');
 axis("padded");
 title(Figname);
-toc
 str = strjoin(["Saving Raman Plot",fullfile(plotSavePath,'Raman_Plot.png')]);
-tic
 disp(str)
 imageData = getframe(RamanPlot);
 imwrite(imageData.cdata,fullfile(plotSavePath,'Raman_Plot.png'));
-toc
+
 
 
 disp("Creating Reduced Raman Plot")
 
-disp("2")
-tic
 reducedRaman = figure("Visible","off");
 I = removeoutliers(I);
 I = I(RSL2n:RSL1n,:);
 RS = RS(RSL2n:RSL1n,:);
-toc
 P1 = 1250;
 P2 = 1103;
 
-disp("3")
-tic
 [vH vHi]=findpeak(RS,P1,7);
 [vL vLi]=findpeak(RS,P2,7);
 Lambda = str2num(string(settings(6)));
+
+%New Baseline correction
+% for i = 1:size(I,2)
+%     I(:,i) = Raman_Spec_Baseline(I(:,i));
+% end
+
 [I,X] = airPLS(I',Lambda);
 I=I';
+
 I = removeoutliers(I);
 In = I./max(I(vLi,:));
-toc
-disp("4")
-tic
 plot(RS,In)
 xlabel('Raman Shift (cm^-^1)');
 ylabel('Counts (arb.)');
 axis("padded");
 title(Figname);
-toc
 str = strjoin(["Saving Reduced Raman Plot",fullfile(plotSavePath,'Reduced_Raman.png')]);
-tic
 disp(str)
 imageData = getframe(reducedRaman);
 imwrite(imageData.cdata,fullfile(plotSavePath,'Reduced_Raman.png'));
-toc
 
 
 [n m] = size(data);
@@ -211,7 +201,7 @@ switch obj.savePlotFigs
             savefig(RamanPlot,saveLoc,"compact");
             disp(str);
         else
-            str = strjoin(["Data exceeds maximum figure size.",num2str(plotSize.bytes),"bytes"]);
+            str = strjoin(["Data exceeds maximum figure size.",num2str(loc.bytes),"bytes"]);
             disp(str);
         end
 
@@ -224,7 +214,7 @@ switch obj.savePlotFigs
             savefig(reducedRaman,saveLoc,"compact");
             disp(str);
         else
-            str = strjoin(["Figure exceeds maximum figure size.",num2str(plotSize.bytes),"bytes"]);
+            str = strjoin(["Figure exceeds maximum figure size.",num2str(loc.bytes),"bytes"]);
             disp(str);
         end
 
