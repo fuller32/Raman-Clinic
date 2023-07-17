@@ -94,7 +94,11 @@ T = t*dt;
 % saveas(surfPlot,fullfile(plotSavePath,'Surf_Plot.png'));
 
 disp("Creating Cure Kinetics Plot")
-cureKinetics = figure;
+if obj.hidePlots == 1
+    cureKinetics = figure('Visible','off');
+else
+    cureKinetics = figure;
+end
 Ir = sum(I(vHi,:))./sum(I(vLi,:));
 alpha = (Ir(1)-Ir)./Ir(1);
 plot(T,alpha,'b.')
@@ -138,7 +142,11 @@ a = results(1);
 k = results(2);
 n = results(3);
 disp("Creating Cure Kinetics Fit Plot")
-kineticsFit = figure;
+if obj.hidePlots == 1
+    kineticsFit = figure('Visible','off');
+else
+    kineticsFit = figure;
+end
 %[fitparams, sse] = stepfittingreactionkinetics(T',alpha',a,k,n,1,obj);
 plot(fitparams,T,alpha)
 legend("off");

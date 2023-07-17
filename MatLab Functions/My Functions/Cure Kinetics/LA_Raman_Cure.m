@@ -82,7 +82,11 @@ T = t*dt;
 % axis([0 60 1590 1650 0 1.1])
 
 disp("Creating LA Cure Kinetics Plot")
-cureKinetics = figure;
+if obj.hidePlots == 1
+    cureKinetics = figure('Visible','off');
+else
+    cureKinetics = figure;
+end
 Ir = sum(I(vHi,:))./sum(I(vLi,:));
 alpha = (Ir(1)-Ir)./Ir(1);
 plot(T,alpha,'b.')
@@ -128,7 +132,11 @@ k = results(2);
 n = results(3);
 disp("Creating Cure Kinetics Fit Plot")
 
-kineticsFit = figure;
+if obj.hidePlots == 1
+    kineticsFit = figure('Visible','off');
+else
+    kineticsFit = figure;
+end
 
 plot(fitparams,T,alpha)
 legend("off");

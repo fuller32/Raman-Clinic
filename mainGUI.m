@@ -32,6 +32,7 @@ classdef mainGUI < handle
         UIGrids
         UIelements
         excelData
+        avaliableData
         activeTest
         activeTestInfo
         activeTestname
@@ -41,6 +42,7 @@ classdef mainGUI < handle
         interupt = 1;
         savePlotFigs = 0;
         plotFileSizeLimit = 500; %Size in MBs
+        hidePlots;
     end
     
     methods
@@ -101,14 +103,14 @@ classdef mainGUI < handle
             grids.topGrid.ColumnWidth = {'.1x','1x','.1x'};
 
             %Middle Grid
-            grids.midGrid = uigridlayout(grids.mainGrid,[1,2]);
+            grids.midGrid = uigridlayout(grids.mainGrid,[1,3]);
             grids.midGrid.Layout.Row = 2;
-            grids.midGrid.ColumnWidth = {'.5x','1x'};
+            grids.midGrid.ColumnWidth = {'.5x','1x','.25x'};
                 %Grid that will hold the plots
-                grids.midR = uigridlayout(grids.midGrid,[2,1]);
-                grids.midR.Layout.Column = 2;
-                grids.midR.Layout.Row = 1;
-                grids.midR.RowHeight = {'1x','.15x'};
+                grids.midPlot = uigridlayout(grids.midGrid,[2,1]);
+                grids.midPlot.Layout.Column = 2;
+                grids.midPlot.Layout.Row = 1;
+                grids.midPlot.RowHeight = {'1x','.15x'};
 
                 %Grid that will hold test selection
                     %Size will change depending on test selected
@@ -116,6 +118,11 @@ classdef mainGUI < handle
                 grids.midL.RowHeight = {'fit'};
                 grids.midL.Layout.Column = 1;
                 grids.midL.Layout.Row = 1;
+
+                %Grid that will hold the plots
+                grids.midR = uigridlayout(grids.midGrid,[4,1]);
+                grids.midR.Layout.Column = 3;
+                grids.midR.Layout.Row = 1;
 
             %Bottom Grid
             grids.bottomGrid = uigridlayout(grids.mainGrid,[3,2]);
@@ -136,6 +143,7 @@ classdef mainGUI < handle
             %Load grids as local variables to make calls shorter.
             tgrid = obj.UIGrids.topGrid;
             mLgrid = obj.UIGrids.midL;
+            mPlotgrid = obj.UIGrids.midPlot;
             mRgrid = obj.UIGrids.midR;
             bgrid = obj.UIGrids.bottomGrid;
 
@@ -178,6 +186,7 @@ classdef mainGUI < handle
                 subFolders = folders([folders(:).isdir]);
                 subFolders = subFolders(~ismember({subFolders(:).name},{'.','..'}));
                 subFolders = {subFolders.name};
+                obj.avaliableData = subFolders;
                 misc.dataDrpDwn = uidropdown(bgrid,"Items",subFolders,...
                     "FontSize",obj.fontSz.subheadingFontSize,"ValueChangedFcn",...
                     @(h,e)selectedTest(obj));
@@ -219,15 +228,20 @@ classdef mainGUI < handle
                 labels.statusLbl.Layout.Row = 1;
                 labels.statusLbl.Layout.Column = 3;
 
-            %Right side
-                axes.plotAxes = uiaxes(mRgrid);
+            %Plot
+                axes.plotAxes = uiaxes(mPlotgrid);
                 axes.plotAxes.Layout.Row = 1;
                 axes.plotAxes.Layout.Column = 1;
 
-                misc.axesDrpDown = uidropdown(mRgrid,"FontSize",...
+                misc.axesDrpDown = uidropdown(mPlotgrid,"FontSize",...
                     obj.fontSz.subheadingFontSize);
                 misc.axesDrpDown.Layout.Row = 2;
                 misc.axesDrpDown.Layout.Column = 1;
+
+            %Right Side
+                buttons.MultiSelect = uibutton(mRgrid,"Text","Multi-Select",...
+                    "FontSize",obj.fontSz.subheadingFontSize,"ButtonPushedFcn",...
+                    @(h,e)multSelectWindow(obj));
 
 
             %Collect UI elements
@@ -375,6 +389,25 @@ classdef mainGUI < handle
                     disp(str)
                     return
                 end
+            end
+        end
+
+        function multSelectWindow(obj)
+            disp("Mult-select button selected")
+            prompt = obj.avaliableData;
+            list = listdlg("ListString",prompt,"SelectionMode","multiple");
+            sz = size(list,2);
+            if sz > 0
+                obj.hidePlots = 1;
+                for i = 1:sz
+                    obj.activeTest = obj.avaliableData{list(i)};
+                    str = strjoin(["Mult-select running",obj.activeTest]);
+                    disp(str);
+                    obj.runFunctions;
+                end
+                obj.hidePlots = 0;
+            else
+                disp("No selection made")
             end
         end
 
