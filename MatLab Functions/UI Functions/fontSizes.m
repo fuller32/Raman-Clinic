@@ -18,6 +18,8 @@ if screenWidth <= 800 && screenHeight <= 600
     resolutionCategory = 'Low';
 elseif screenWidth <= 1280 && screenHeight <= 800
     resolutionCategory = 'Medium';
+elseif screenWidth == 5120 && screenHeight == 2160
+    resolutionCategory = 'Ultrawide';
 elseif screenWidth > 1280 && screenHeight > 800
     resolutionCategory = 'High';
 end
@@ -35,6 +37,11 @@ switch resolutionCategory
         bodyFontSize = 14;
         labelFontSize = 12;
     case 'High'
+        titleFontSize = 24;
+        subheadingFontSize = 18;
+        bodyFontSize = 14;
+        labelFontSize = 12;
+    case 'Ultrawide'
         titleFontSize = 30;
         subheadingFontSize = 24;
         bodyFontSize = 16;
