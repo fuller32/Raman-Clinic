@@ -39,8 +39,8 @@ classdef mainGUI < handle
         activeTestOrder
         progUI
         savefilePath
-        interupt = 1;
-        savePlotFigs = 0;
+        interupt = 0;
+        savePlotFigs = 1;
         plotFileSizeLimit = 500; %Size in MBs
         hidePlots;
         PlotList
