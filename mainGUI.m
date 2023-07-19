@@ -43,6 +43,7 @@ classdef mainGUI < handle
         savePlotFigs = 0;
         plotFileSizeLimit = 500; %Size in MBs
         hidePlots;
+        PlotList
     end
     
     methods
@@ -173,7 +174,7 @@ classdef mainGUI < handle
                 %Drop down of all tabs in excel
                 misc.excelDrpDwn = uidropdown(bgrid,"Items",sheets,...
                     "Value",sheets(3),"FontSize",obj.fontSz.subheadingFontSize,...
-                    "ValueChangedFcn",@(h,e)updateTable(obj));
+                    "ValueChangedFcn",@(h,e)updateTable(obj,e));
                 misc.excelDrpDwn.Layout.Row = 3;
                 misc.excelDrpDwn.Layout.Column = 1;
                 %Table to hold excel data
@@ -234,7 +235,8 @@ classdef mainGUI < handle
                 axes.plotAxes.Layout.Column = 1;
 
                 misc.axesDrpDown = uidropdown(mPlotgrid,"FontSize",...
-                    obj.fontSz.subheadingFontSize);
+                    obj.fontSz.subheadingFontSize,"ValueChangedFcn",...
+                    @(h,e)plotData(obj));
                 misc.axesDrpDown.Layout.Row = 2;
                 misc.axesDrpDown.Layout.Column = 1;
 
@@ -257,23 +259,31 @@ classdef mainGUI < handle
 
         end
 
-        function updateTable(obj)
+        function updateTable(obj,e)
             disp("Updating excel table")
             index = strmatch(obj.UIelements.misc.excelDrpDwn.Value,...
                 obj.UIelements.misc.excelDrpDwn.Items);
             sheets = sheetnames(obj.excelName);
             obj.excelData = readtable(obj.excelName,"Sheet",sheets(index),"VariableNamingRule","preserve");
             obj.UIelements.misc.excelTable.Data = obj.excelData;
+            cla(obj.UIelements.axes.plotAxes,"reset");
         end
 
         function selectedTest(obj)
+            cla(obj.UIelements.axes.plotAxes,"reset");
             obj.activeTest = obj.UIelements.misc.dataDrpDwn.Value;
             str = strjoin(["Updating selected test to",obj.activeTest]);
             disp(str);
-            [~,idx] = max(strcmp(obj.excelData.Experiment(:),"RK-01-91-1"));
+            [validFlag,idx] = max(strcmp(obj.excelData.Experiment(:),obj.activeTest));
+            if validFlag == 0
+                disp("Data isn't in excel alerting user")
+                uialert(obj.figure,"Data isn't present in Excel, add data to excel and try again","Missing Data");
+                return
+            end
             obj.activeTestInfo = obj.excelData(idx,:);
             obj.activeTestname = strrep(obj.activeTestInfo.Resin{1}," ","");
             obj.activeTestOrder = obj.fntOrder.(obj.activeTestname);
+            obj.savefilePath = fullfile(cd,"Results",obj.activeTest);
 
             %Loop to create the updating test selection
             for i=1:size(obj.activeTestOrder.order,2)
@@ -299,6 +309,25 @@ classdef mainGUI < handle
 
             %Add UI elements to the property.
             obj.progUI = UI;
+
+            %Check if plots are present
+            path = fullfile(obj.savefilePath,'Variables','Kinetics_PlotData.mat');
+            pathLA = fullfile(obj.savefilePath,'Variables','LA_Kinetics_PlotData.mat');
+            if exist(path,"file") > 0 && exist(pathLA,"file") > 0
+                obj.PlotList = {'Kinetics Fit','LA Kinetics Fit'};
+                obj.UIelements.misc.axesDrpDown.Items = obj.PlotList;
+                plotData(obj);
+            elseif exist(path,"file") > 0
+                obj.PlotList = {'Kinetics Fit'};
+                obj.UIelements.misc.axesDrpDown.Items = obj.PlotList;
+                plotData(obj);
+            elseif exist(pathLA,"file") > 0
+                obj.PlotList = {'LA Kinetics Fit'};
+                obj.UIelements.misc.axesDrpDown.Items = obj.PlotList;
+                plotData(obj);
+            else
+                obj.PlotList = "";
+            end
         end
 
         function runFunctions(obj)
@@ -357,6 +386,9 @@ classdef mainGUI < handle
             str = strjoin(["Writing diary log out to",fullfile(obj.savefilePath,"Reports")]);
             disp(str)
             copyfile("diaryLog",fullfile(obj.savefilePath,"Reports"))
+            if obj.hidePlots == 0
+                selectedTest(obj);
+            end
         end
 
         function settingsButton(obj)
@@ -408,6 +440,65 @@ classdef mainGUI < handle
                 obj.hidePlots = 0;
             else
                 disp("No selection made")
+            end
+        end
+
+        function plotData(obj)
+            cla(obj.UIelements.axes.plotAxes,"reset");
+            selection = obj.UIelements.misc.axesDrpDown.Value;
+            switch selection
+                case 'Kinetics Fit'
+                    fitpath = fullfile(obj.savefilePath,'Variables',"Epoxy_*settings.mat");
+                    fitpath = dir(fitpath);
+                    fitpath = fullfile(fitpath(1).folder,fitpath(1).name);
+                    load(fitpath,'fitparams','gof');
+                    plotPath = fullfile(obj.savefilePath,'Variables','Kinetics_PlotData.mat');
+                    load(plotPath,'plotData');
+                    ax = obj.UIelements.axes.plotAxes;
+                    %For some reason you can't direct plot cfit data on a
+                    %UIplot (no good reason for this). Work around below
+                    f = figure("Visible","off");
+                    tempPlot = plot(fitparams,plotData.x,plotData.y);
+                    copyobj(tempPlot,ax);
+                    axis(ax,"padded");
+                    xlabel(ax,'Time (s)');
+                    ylabel(ax,'Conversion');
+                    title(ax,{obj.activeTest, 'Extent of Cure Kinetics'},'interpreter','none');
+                    sse = gof.sse;
+                    a = fitparams.au;
+                    k = fitparams.k;
+                    n = fitparams.n;
+                    s = {['\alpha_u = ' num2str(a)]...
+                        ['k = ' num2str(k)] ...
+                        ['n = ' num2str(n)]...
+                        ['SSE = ' num2str(sse)]};
+                    text(ax,max(plotData.x)*.7,.1,s)
+                case 'LA Kinetics Fit'
+                    fitpath = fullfile(obj.savefilePath,'Variables',"Epoxy_*LA*settings.mat");
+                    fitpath = dir(fitpath);
+                    fitpath = fullfile(fitpath(1).folder,fitpath(1).name);
+                    load(fitpath,'fitparams','gof');
+                    plotPath = fullfile(obj.savefilePath,'Variables','LA_Kinetics_PlotData.mat');
+                    load(plotPath,'plotData');
+                    ax = obj.UIelements.axes.plotAxes;
+                    %For some reason you can't direct plot cfit data on a
+                    %UIplot (no good reason for this). Work around below
+                    f = figure("Visible","off");
+                    tempPlot = plot(fitparams,plotData.x,plotData.y);
+                    copyobj(tempPlot,ax);
+                    axis(ax,"padded");
+                    xlabel(ax,'Time (s)');
+                    ylabel(ax,'Conversion');
+                    title(ax,{obj.activeTest, 'Extent of Cure Kinetics'},'interpreter','none');
+                    sse = gof.sse;
+                    a = fitparams.au;
+                    k = fitparams.k;
+                    n = fitparams.n;
+                    s = {['\alpha_u = ' num2str(a)]...
+                        ['k = ' num2str(k)] ...
+                        ['n = ' num2str(n)]...
+                        ['SSE = ' num2str(sse)]};
+                    text(ax,max(plotData.x)*.7,.1,s)
             end
         end
 

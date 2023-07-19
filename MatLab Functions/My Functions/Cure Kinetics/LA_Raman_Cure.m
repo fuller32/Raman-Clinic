@@ -127,9 +127,9 @@ sse = gof.sse;
 results = fitparams;
 delete(progBar);
 disp("Fit calculated")
-a = results(1);
-k = results(2);
-n = results(3);
+a = fitparams.au;
+k = fitparams.k;
+n = fitparams.n;
 disp("Creating Cure Kinetics Fit Plot")
 
 if obj.hidePlots == 1
@@ -166,14 +166,22 @@ else
     path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_LA_',num2str(range),'s.csv']);
     writematrix(R,path);
 end
+
+plotData.x = T;
+plotData.y = alpha;
+
 comp = mexext;
 if 1 == strcmp(comp,'mexw64')
     path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_LA_',num2str(range),'s_fitparameters','settings']);
-    save(path,'fitparams','-v7.3');
+    save(path,'fitparams','gof','-v7.3');
+    path = fullfile(obj.savefilePath,"Variables","LA_Kinetics_PlotData");
+    save(path,'plotData','-v7.3')
 else
     disp("Your machine is 32-bit and may have issues with saving matlab variables greater then 2GB")
     path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_LA_',num2str(range),'s_fitparameters','settings']);
-    save(path,'fitparams');
+    save(path,'fitparams','gof');
+    path = fullfile(obj.savefilePath,"Variables","LA_Kinetics_PlotData");
+    save(path,'plotData')
 end
 delete(progBar);
 

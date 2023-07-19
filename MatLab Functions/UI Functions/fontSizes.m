@@ -18,7 +18,7 @@ if screenWidth <= 800 && screenHeight <= 600
     resolutionCategory = 'Low';
 elseif screenWidth <= 1280 && screenHeight <= 800
     resolutionCategory = 'Medium';
-elseif screenWidth == 5120 && screenHeight == 2160
+elseif screenWidth == 5120 && screenHeight == 1440
     resolutionCategory = 'Ultrawide';
 elseif screenWidth > 1280 && screenHeight > 800
     resolutionCategory = 'High';

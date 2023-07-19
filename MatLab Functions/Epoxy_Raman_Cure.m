@@ -73,7 +73,7 @@ imageData = getframe(reducedRaman);
 imwrite(imageData.cdata,fullfile(plotSavePath,'Reduced_Raman.png'));
 
 
-[n m] = size(data);
+[n,m] = size(data);
 [y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Start csv")));
 Ti = 1440*d+60*h+mn+s/60;
 [y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Stop csv")));
@@ -138,9 +138,9 @@ sse = gof.sse;
 results = fitparams;
 delete(progBar);
 disp("Fit calculated")
-a = results(1);
-k = results(2);
-n = results(3);
+a = results.au;
+k = results.k;
+n = results.n;
 disp("Creating Cure Kinetics Fit Plot")
 if obj.hidePlots == 1
     kineticsFit = figure('Visible','off');
@@ -182,14 +182,22 @@ end
 %Have the save function set to version -7.3 to allow for variables of size
 %>=2GB. Needs to be a 64 bit machine to work so check has been added.
 
+%Added code to keep plot data for easier rebuilds
+plotData.x = T;
+plotData.y = alpha;
+
 comp = mexext;
 if 1 == strcmp(comp,'mexw64')
     path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_',num2str(range),'s_fitparameters','settings']);
-    save(path,'fitparams','-v7.3');
+    save(path,'fitparams','gof','-v7.3');
+    path = fullfile(obj.savefilePath,"Variables","Kinetics_PlotData");
+    save(path,'plotData','-v7.3')
 else
     disp("Your machine is 32-bit and may have issues with saving matlab variables greater then 2GB")
     path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_',num2str(range),'s_fitparameters','settings']);
-    save(path,'fitparams');
+    save(path,'fitparams','gof');
+    path = fullfile(obj.savefilePath,"Variables","Kinetics_PlotData");
+    save(path,'plotData')
 end
 delete(progBar);
 
