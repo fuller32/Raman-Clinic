@@ -433,6 +433,17 @@ classdef mainGUI < handle
                 obj.hidePlots = 1;
                 for i = 1:sz
                     obj.activeTest = obj.avaliableData{list(i)};
+                    [validFlag,idx] = max(strcmp(obj.excelData.Experiment(:),obj.activeTest));
+                    if validFlag == 0
+                        disp("Data isn't in excel alerting user")
+                        uialert(obj.figure,"Data isn't present in Excel, add data to excel and try again","Missing Data");
+                        return
+                    end
+                    obj.activeTestInfo = obj.excelData(idx,:);
+                    obj.activeTestname = strrep(obj.activeTestInfo.Resin{1}," ","");
+                    obj.activeTestOrder = obj.fntOrder.(obj.activeTestname);
+                    obj.savefilePath = fullfile(cd,"Results",obj.activeTest);
+
                     str = strjoin(["Mult-select running",obj.activeTest]);
                     disp(str);
                     obj.runFunctions;
