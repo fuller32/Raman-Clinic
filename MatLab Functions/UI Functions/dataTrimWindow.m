@@ -157,7 +157,8 @@ classdef dataTrimWindow < handle
         end
 
         function cancelBtn(obj)
-            disp("Test");
+            disp("Closing Trim Window");
+            obj.delete;
         end
 
         function acceptBtn(obj)
@@ -176,11 +177,15 @@ classdef dataTrimWindow < handle
                 rightIdx = rightIdx - 1;
             end
             disp("Found indexes");
-
-            T = tempLdata.x(leftIdx:rightIdx)-tempLdata.x(leftIdx-1);
+            try
+                T = tempLdata.x(leftIdx:rightIdx)-tempLdata.x(leftIdx-1);
+            catch
+                T = tempLdata.x(leftIdx:rightIdx);
+            end
 
             path = fullfile(obj.savefilePath,"Variables",[obj.activeData,'_s.mat']);
             save(path,"leftIdx","rightIdx","T");
+            obj.delete;
         end
 
         function delete(obj)

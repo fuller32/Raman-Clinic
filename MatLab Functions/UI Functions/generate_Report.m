@@ -30,20 +30,16 @@ function generate_Report(mainFig)
     while ~strcmp(holeId, '#end#')
         switch holeId
             case 'title'
-                fprintf('Current hole ID: %s\n', holeId);
                 str = ['Raman Results for ',mainFig.activeTest];
                 textObj = Text(str,'RptHeader');
                 append(doc,textObj);
             case 'date'
-                fprintf('Current hole ID: %s\n', holeId);
                 textObj = Text(date,'SubHeader');
                 append(doc,textObj);
             case 'git'
-                fprintf('Current hole ID: %s\n', holeId);
                 textObj = Text(strtrim(mainFig.versionCtrl),'SubHeader');
                 append(doc,textObj);
             case 'tbl1'
-                fprintf('Current hole ID: %s\n', holeId);
                 tbl = mainFig.activeTestInfo;
                 col1 = tbl.Properties.VariableNames;
                 col2 = table2cell(tbl);
@@ -51,70 +47,60 @@ function generate_Report(mainFig)
                 table = Table(tbl,'tblDesign');
                 append(doc,table);
             case 'ramanPlot'
-                fprintf('Current hole ID: %s\n', holeId);
                 imPath = fullfile(plotPath,'Raman_Plot.png');
                 image = Image(imPath);
                 image.Width  = '13cm';
                 image.Height = '10cm';
                 append(doc,image);
             case 'reducedramanPlot'
-                fprintf('Current hole ID: %s\n', holeId);
                 imPath = fullfile(plotPath,'Reduced_Raman.png');
                 image = Image(imPath);
                 image.Width  = '13cm';
                 image.Height = '10cm';
                 append(doc,image);
             case 'chemPlot'
-                fprintf('Current hole ID: %s\n', holeId);
                 imPath = fullfile(plotPath,'Cure_Kinetics.png');
                 image = Image(imPath);
                 image.Width  = '13cm';
                 image.Height = '10cm';
                 append(doc,image);
             case 'chemFitPlot'
-                fprintf('Current hole ID: %s\n', holeId);
                 imPath = fullfile(plotPath,'Cure_Kinetics_Fit.png');
                 image = Image(imPath);
                 image.Width  = '13cm';
                 image.Height = '10cm';
                 append(doc,image);
             case 'chemPlotTrim'
-                fprintf('Current hole ID: %s\n', holeId);
                 imPath = fullfile(plotPath,'Cure_Kinetics_s.png');
                 image = Image(imPath);
                 image.Width  = '13cm';
                 image.Height = '10cm';
                 append(doc,image);
             case 'chemFitPlotTrim'
-                fprintf('Current hole ID: %s\n', holeId);
                 imPath = fullfile(plotPath,'Cure_Kinetics_Fit_s.png');
                 image = Image(imPath);
                 image.Width  = '13cm';
                 image.Height = '10cm';
                 append(doc,image);
             case 'strucPlot'
-                fprintf('Current hole ID: %s\n', holeId);
                 imPath = fullfile(plotPath,'LA_Cure_Kinetics.png');
                 image = Image(imPath);
                 image.Width  = '13cm';
                 image.Height = '10cm';
                 append(doc,image);
             case 'strucFitPlot'
-                fprintf('Current hole ID: %s\n', holeId);
                 imPath = fullfile(plotPath,'LA_Cure_Kinetics_fit.png');
                 image = Image(imPath);
                 image.Width  = '13cm';
                 image.Height = '10cm';
                 append(doc,image);
             case 'strucPlotTrim'
-                fprintf('Current hole ID: %s\n', holeId);
                 imPath = fullfile(plotPath,'LA_Cure_Kinetics_s.png');
                 image = Image(imPath);
                 image.Width  = '13cm';
                 image.Height = '10cm';
                 append(doc,image);
             case 'strucFitPlotTrim'
-                fprintf('Current hole ID: %s\n', holeId);
                 imPath = fullfile(plotPath,'LA_Cure_Kinetics_fit_s.png');
                 image = Image(imPath);
                 image.Width  = '13cm';
