@@ -2,8 +2,31 @@ function Epoxy_Raman_Cure(obj)
 
 disp("Setting up paths")
 path = fullfile(obj.savefilePath,"Variables",[obj.activeTest,'.mat']);
-
+trimPath = fullfile(obj.savefilePath,"Variables",[obj.activeTest,'_s.mat']);
 load(path,'data');
+
+if exist(trimPath,"file") > 0 && obj.useTrim == 1
+    load(trimPath,'leftIdx','rightIdx','T');
+    col1 = data(:,1);
+    data = data(:,leftIdx:rightIdx);
+    data = [col1,data];
+    trimFlag = 1;
+else
+    [n,m] = size(data);
+    [y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Start csv")));
+    Ti = 1440*d+60*h+mn+s/60;
+    [y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Stop csv")));
+    Tf = 1440*d+60*h+mn+s/60;
+    Tmax = Tf-Ti;
+    
+    dt = 60*Tmax/(m-1);
+    t =1:m-1;
+    T = t*dt;
+
+    trimFlag = 0;
+end
+
+
 name = obj.activeTest;
 Figname = strrep(name,'_',' ');
 
@@ -35,7 +58,11 @@ title(Figname);
 str = strjoin(["Saving Raman Plot",fullfile(plotSavePath,'Raman_Plot.png')]);
 disp(str)
 imageData = getframe(RamanPlot);
-imwrite(imageData.cdata,fullfile(plotSavePath,'Raman_Plot.png'));
+if trimFlag == 1
+    imwrite(imageData.cdata,fullfile(plotSavePath,'Raman_Plot_s.png'));
+else
+    imwrite(imageData.cdata,fullfile(plotSavePath,'Raman_Plot.png'));
+end
 
 
 
@@ -71,18 +98,13 @@ str = strjoin(["Saving Reduced Raman Plot",fullfile(plotSavePath,'Reduced_Raman.
 disp(str)
 imageData = getframe(reducedRaman);
 imwrite(imageData.cdata,fullfile(plotSavePath,'Reduced_Raman.png'));
+if trimFlag == 1
+    imwrite(imageData.cdata,fullfile(plotSavePath,'Reduced_Raman_s.png'));
+else
+    imwrite(imageData.cdata,fullfile(plotSavePath,'Reduced_Raman.png'));
+end
 
 
-[n,m] = size(data);
-[y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Start csv")));
-Ti = 1440*d+60*h+mn+s/60;
-[y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Stop csv")));
-Tf = 1440*d+60*h+mn+s/60;
-Tmax = Tf-Ti;
-
-dt = 60*Tmax/(m-1);
-t =1:m-1;
-T = t*dt;
 % disp("Creating Surface Plot")
 % surfPlot = figure;
 % [X Y] = meshgrid(T,RS);
@@ -109,7 +131,12 @@ title({Figname, 'Extent of Cure Kinetics'})
 str = strjoin(["Saving Cure Kinetics Plot",fullfile(plotSavePath,'Cure_Kinetics.png')]);
 disp(str)
 imageData = getframe(cureKinetics);
-imwrite(imageData.cdata,fullfile(plotSavePath,'Cure_Kinetics.png'));
+if trimFlag == 1
+    imwrite(imageData.cdata,fullfile(plotSavePath,'Cure_Kinetics_s.png'));
+else
+    imwrite(imageData.cdata,fullfile(plotSavePath,'Cure_Kinetics.png'));
+end
+
 hold off
 
 range = str2num(string(settings(5)))- str2num(string(settings(4)));
@@ -165,7 +192,12 @@ str = strjoin(["Saving Cure Kinetics Fit Plot",fullfile(plotSavePath,'Cure_Kinet
 disp(str)
 
 imageData = getframe(kineticsFit);
-imwrite(imageData.cdata,fullfile(plotSavePath,'Cure_Kinetics_Fit.png'));
+if trimFlag == 1
+    imwrite(imageData.cdata,fullfile(plotSavePath,'Cure_Kinetics_Fit_s.png'));
+else
+    imwrite(imageData.cdata,fullfile(plotSavePath,'Cure_Kinetics_Fit.png'));
+end
+
 
 progBar = uiprogressdlg(obj.figure,"Title","Saving Files",...
     "Indeterminate","on");

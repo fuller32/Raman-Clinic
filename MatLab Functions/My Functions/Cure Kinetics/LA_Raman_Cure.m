@@ -2,8 +2,30 @@ function LA_Raman_Cure(obj)
 
 disp("Setting up paths")
 path = fullfile(obj.savefilePath,"Variables",[obj.activeTest,'.mat']);
-
+trimPath = fullfile(obj.savefilePath,"Variables",[obj.activeTest,'_s.mat']);
 load(path,'data');
+
+if exist(trimPath,"file") > 0 && obj.useTrim == 1
+    load(trimPath,'leftIdx','rightIdx','T');
+    col1 = data(:,1);
+    data = data(:,leftIdx:rightIdx);
+    data = [col1,data];
+    trimFlag = 1;
+else
+    [n,m] = size(data);
+    [y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Start csv")));
+    Ti = 1440*d+60*h+mn+s/60;
+    [y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Stop csv")));
+    Tf = 1440*d+60*h+mn+s/60;
+    Tmax = Tf-Ti;
+    
+    dt = 60*Tmax/(m-1);
+    t =1:m-1;
+    T = t*dt;
+
+    trimFlag = 0;
+end
+
 name = obj.activeTest;
 Figname = strrep(name,'_',' ');
 
@@ -61,21 +83,13 @@ axis padded
 title(Figname)
 str = strjoin(["Saving  LA Raman Plot",fullfile(plotSavePath,'LA_Raman_Plot.png')]);
 disp(str);
-saveas(RamanPlot,fullfile(plotSavePath,'LA_Raman_Plot.png'))
 imageData = getframe(RamanPlot);
-imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Raman_Plot.png'));
+if trimFlag == 1
+    imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Raman_Plot_s.png'));
+else
+    imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Raman_Plot.png'));
+end
 
-
-[n m] = size(data);
-[y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Start csv")));
-Ti = 1440*d+60*h+mn+s/60;
-[y, mm, d, h, mn, s]=datevec(string(obj.activeTestInfo.("Experiment Stop csv")));
-Tf = 1440*d+60*h+mn+s/60;
-Tmax = Tf-Ti;
-
-dt = 60*Tmax/(m-1);
-t =1:m-1;
-T = t*dt;
 % figure
 % [X Y] = meshgrid(T,RS);
 % surf(X,Y, I./max(I(vLi,:)))
@@ -98,6 +112,11 @@ str = strjoin(["Saving Cure Kinetics Plot",fullfile(plotSavePath,'LA_Cure_Kineti
 disp(str)
 imageData = getframe(cureKinetics);
 imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Cure_Kinetics.png'));
+if trimFlag == 1
+    imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Cure_Kinetics_s.png'));
+else
+    imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Cure_Kinetics.png'));
+end
 
 hold off
 
@@ -153,7 +172,12 @@ delete(progBar);
 str = strjoin(["Saving LA Cure Kinetics Fit Plot",fullfile(plotSavePath,'LA_Cure_Kinetics_Fit.png')]);
 disp(str)
 imageData = getframe(kineticsFit);
-imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Cure_Kinetics_Fit.png'));
+if trimFlag == 1
+    imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Cure_Kinetics_Fit_s.png'));
+else
+    imwrite(imageData.cdata,fullfile(plotSavePath,'LA_Cure_Kinetics_Fit.png'));
+end
+
 
 progBar = uiprogressdlg(obj.figure,"Title","Saving Files",...
     "Indeterminate","on");

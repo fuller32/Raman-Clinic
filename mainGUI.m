@@ -42,8 +42,11 @@ classdef mainGUI < handle
         interupt = 0;
         savePlotFigs = 1;
         plotFileSizeLimit = 500; %Size in MBs
+        useTrim = 1;
         hidePlots;
         PlotList
+        screenHeight
+        screenWidth
     end
     
     methods
@@ -76,6 +79,8 @@ classdef mainGUI < handle
             
             %Get screensize
             screenInfo = get(groot,'ScreenSize');
+            obj.screenHeight = screenInfo(4);
+            obj.screenWidth = screenInfo(3);
             height = screenInfo(4);
             width = screenInfo(3);
 
@@ -244,6 +249,14 @@ classdef mainGUI < handle
                 buttons.MultiSelect = uibutton(mRgrid,"Text","Multi-Select",...
                     "FontSize",obj.fontSz.subheadingFontSize,"ButtonPushedFcn",...
                     @(h,e)multSelectWindow(obj));
+                buttons.MultiSelect.Layout.Row = 1;
+                buttons.MultiSelect.Layout.Column = 1;
+
+                buttons.TrimdataBtn = uibutton(mRgrid,"Text","Trim Data",...
+                    "FontSize",obj.fontSz.subheadingFontSize,"ButtonPushedFcn",...
+                    @(h,e)callTrimWindow(obj));
+                buttons.TrimdataBtn.Layout.Row = 2;
+                buttons.TrimdataBtn.Layout.Column = 1;
 
 
             %Collect UI elements
@@ -400,13 +413,14 @@ classdef mainGUI < handle
             if strcmp(selection,'General') == 1
                 disp("Opening general settings");
                 prompt = {'Interupt Between Functions:','Enable Saving of Plot Figures(Will increase file sizes and runtime)',...
-                    'Maximum Figure Plot Size (Size in MB)'};
+                    'Maximum Figure Plot Size (Size in MB)','Use trimmed data if present'};
                 settings = {int2str(obj.interupt),int2str(obj.savePlotFigs),...
-                    int2str(obj.plotFileSizeLimit)};
+                    int2str(obj.plotFileSizeLimit),int2str(obj.useTrim)};
                 box = inputdlg(prompt,"Settings",[1,35],settings);
                 obj.interupt = str2double(box{1});
                 obj.savePlotFigs = str2double(box{2});
                 obj.plotFileSizeLimit = str2double(box{3});
+                obj.useTrim = str2double(box{3});
             else
                 try
                     str = strjoin(["Opening",selection,"settings"]);
@@ -511,6 +525,11 @@ classdef mainGUI < handle
                         ['SSE = ' num2str(sse)]};
                     text(ax,max(plotData.x)*.7,.1,s)
             end
+        end
+
+        function callTrimWindow(obj)
+            disp("Calling Trim Window");
+            dataTrimWindow(obj);
         end
 
         function delete(obj)
