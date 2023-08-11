@@ -141,7 +141,7 @@ progBar = uiprogressdlg(obj.figure,"Title","Calculating Fit","Indeterminate","on
 lowerValues = [str2double(settings{7}) str2double(settings{10}) str2double(settings{13})];
 upperValues = [str2double(settings{8}) str2double(settings{11}) str2double(settings{14})];
 %[fitparams, sse] = stepfittingreactionkinetics(T',alpha',a,k,n,0);
-[fitparams, gof] = stepfittingreactionkinetics_NLLS(T,alpha,lowerValues,upperValues);
+[fitparams, gof , result] = stepfittingreactionkinetics_NLLS(T,alpha,lowerValues,upperValues);
 sse = gof.sse;
 results = fitparams;
 delete(progBar);
@@ -197,13 +197,13 @@ plotData.y = alpha;
 comp = mexext;
 if 1 == strcmp(comp,'mexw64')
     path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_LA_',num2str(range),'s_fitparameters','settings']);
-    save(path,'fitparams','gof','-v7.3');
+    save(path,'fitparams','gof','result','-v7.3');
     path = fullfile(obj.savefilePath,"Variables","LA_Kinetics_PlotData");
     save(path,'plotData','-v7.3')
 else
     disp("Your machine is 32-bit and may have issues with saving matlab variables greater then 2GB")
     path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_LA_',num2str(range),'s_fitparameters','settings']);
-    save(path,'fitparams','gof');
+    save(path,'fitparams','gof', 'result');
     path = fullfile(obj.savefilePath,"Variables","LA_Kinetics_PlotData");
     save(path,'plotData')
 end

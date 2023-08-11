@@ -43,7 +43,7 @@ classdef mainGUI < handle
         savePlotFigs = 1;
         plotFileSizeLimit = 500; %Size in MBs
         useTrim = 1;
-        hidePlots;
+        hidePlots = 0;
         PlotList
         screenHeight
         screenWidth
@@ -413,14 +413,16 @@ classdef mainGUI < handle
             if strcmp(selection,'General') == 1
                 disp("Opening general settings");
                 prompt = {'Interupt Between Functions:','Enable Saving of Plot Figures(Will increase file sizes and runtime)',...
-                    'Maximum Figure Plot Size (Size in MB)','Use trimmed data if present'};
+                    'Maximum Figure Plot Size (Size in MB)','Use trimmed data if present','Hide plots'};
                 settings = {int2str(obj.interupt),int2str(obj.savePlotFigs),...
-                    int2str(obj.plotFileSizeLimit),int2str(obj.useTrim)};
+                    int2str(obj.plotFileSizeLimit),int2str(obj.useTrim),...
+                    int2str(obj.hidePlots)};
                 box = inputdlg(prompt,"Settings",[1,35],settings);
                 obj.interupt = str2double(box{1});
                 obj.savePlotFigs = str2double(box{2});
                 obj.plotFileSizeLimit = str2double(box{3});
-                obj.useTrim = str2double(box{3});
+                obj.useTrim = str2double(box{4});
+                obj.hidePlots = str2double(box{5});
             else
                 try
                     str = strjoin(["Opening",selection,"settings"]);

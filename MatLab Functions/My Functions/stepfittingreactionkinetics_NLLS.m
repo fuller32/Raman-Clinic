@@ -1,4 +1,4 @@
-function [fitresult, gof] = stepfittingreactionkinetics_NLLS(T,alpha,lowerLimit,upperLimit)
+function [fitresult, gof, result] = stepfittingreactionkinetics_NLLS(T,alpha,lowerLimit,upperLimit)
 %CREATEFIT(X,Y)
 %  Create a fit.
 %
@@ -32,3 +32,7 @@ opts.Upper = upperLimit;
 
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft, opts );
+
+%Holds onto values that used to go into fitresult
+result.time = T;
+result.conversion = alpha;

@@ -1,174 +1,152 @@
-clear all; close all;clc;
-%%
-load('RK-01-30-3_LA_0s_fitparameters');
-LA = [fitparams.time fitparams.conversion fitparams.fitting];
-load('RK-01-30-3_0s_fitparameters');
-Me = [fitparams.time fitparams.conversion fitparams.fitting];
 
-% subplot(2,2,1)
-% plot(LA(:,1),LA(:,2),'r')
-% hold on
-% plot(Me(:,1),Me(:,2),'b')
-% 
-% axis padded
-% subplot(2,2,2)
-figure
-plot(LA(:,1),Me(:,2)./LA(:,2),'k--')
-xlabel('Time (s)')
-ylabel('Proportionality')
-title({'RK-01-32-1' 'PM-EM828'})
-axis([0 3500 1.8 2.8])
-% 
-% subplot(2,2,3)
-% plot(LA(:,1),LA(:,3),'r')
-% hold on
-% plot(Me(:,1),Me(:,3),'b')
-% axis padded
-% subplot(2,2,4)
-% figure
-% plot(LA(:,1),Me(:,2)./LA(:,2),'k--')
-% figure
-% axis padded
-% mean(Me(:,3)./LA(:,3))
-% std(Me(:,3)./LA(:,3))
-% 
-figure
-c = mean(Me(35:3244,2)./LA(35:3244,2))
-MSR = mean((Me(:,2)-c.*LA(:,2)).^2)
-std(Me(35:3244,2)./LA(35:3244,2))
-plot(Me(:,1),Me(:,2),'b')
-hold on
-plot(LA(:,1),c.*LA(:,2),'r')
-axis padded
-title({'RK-01-32-1' 'PM-EM828' ['c = ' num2str(c) '   MSR = ' num2str(MSR)]})
-legend('Methacrylate','Structural','Location','Southeast')
-xlabel('Time (s)')
-ylabel('Conversion')
+function LA_Me_Comp(obj)
+%{
+    Function Name:              LA_Me_Comp.m
+    Date of origination:        8/11/2023
+    Programmer:                 Seamus Fullerton
+    Organizations:              Rowan University,
+                                Advanced Materials and Manufacturing 
+                                Institute (AMMI)
+    
+    Description:
+        Handles the calculation of the proportionality constants. Passes in
+        the mainGUI and automatical handles 
 
-%%
-figure
-load('AMS-01-5-11_LA_0s_fitparameters');
-LA = [fitparams.time fitparams.conversion fitparams.fitting];
-load('AMS-01-5-11_0s_fitparameters');
-Me = [fitparams.time fitparams.conversion fitparams.fitting];
+    Revisions:
 
-% subplot(2,2,1)
-% plot(LA(:,1),LA(:,2),'r')
-% hold on
-% plot(Me(:,1),Me(:,2),'b')
-% 
-% axis padded
-% subplot(2,2,2)
-% plot(LA(:,1),Me(:,2)./LA(:,2),'k--')
-% axis padded
-% 
-% subplot(2,2,3)
-% plot(LA(:,1),LA(:,3),'r')
-% hold on
-% plot(Me(:,1),Me(:,3),'b')
-% axis padded
-% subplot(2,2,4)
-% plot(LA(:,1),Me(:,3)./LA(:,3),'k--')
-% axis padded
-% mean(Me(:,3)./LA(:,3))
-% std(Me(:,3)./LA(:,3))
-% 
-% figure
-c = mean(Me(35:3480,2)./LA(35:3480,2))
-MSR = mean((Me(:,2)-c.*LA(:,2)).^2)
-std(Me(35:3480,2)./LA(35:3480,2))
-plot(Me(:,1),Me(:,2),'b')
-hold on
-plot(LA(:,1),c.*LA(:,2),'r')
-axis padded
-title({'AMS-01-5-11' 'DA-2' ['c = ' num2str(c) '   MSR = ' num2str(MSR)]})
-legend('Methacrylate','Structural','Location','Southeast')
-xlabel('Time (s)')
-ylabel('Conversion')
+    Rev "-": Initial release of the code            Seamus Fullerton 
+%}
+    
 
-%%
-figure
-load('AMC-04-11-1_LA_0s_fitparameters');
-LA = [fitparams.time fitparams.conversion fitparams.fitting];
-load('AMC-04-11-1_0s_fitparameters');
-Me = [fitparams.time fitparams.conversion fitparams.fitting];
+    %% Load in variables
+        disp("Reading in variables");
+        progBar = uiprogressdlg(obj.figure,"Title","LA_Me_Comp",...
+        "Indeterminate","on");
 
-% subplot(2,2,1)
-% plot(LA(:,1),LA(:,2),'r')
-% hold on
-% plot(Me(:,1),Me(:,2),'b')
-% 
-% axis padded
-% subplot(2,2,2)
-% plot(LA(:,1),Me(:,2)./LA(:,2),'k--')
-% axis padded
-% 
-% subplot(2,2,3)
-% plot(LA(:,1),LA(:,3),'r')
-% hold on
-% plot(Me(:,1),Me(:,3),'b')
-% axis padded
-% subplot(2,2,4)
-% plot(LA(:,1),Me(:,3)./LA(:,3),'k--')
-% axis padded
-% mean(Me(:,3)./LA(:,3))
-% std(Me(:,3)./LA(:,3))
-% figure
+        %Get plot save path
+        plotSavePath = fullfile(obj.savefilePath,"Plots");
+        figureSavePath = fullfile(plotSavePath,"Figures");
 
-c = mean(Me(35:3471,2)./LA(35:3471,2))
-MSR = mean((Me(:,2)-c.*LA(:,2)).^2)
-std(Me(35:3471,2)./LA(35:3471,2))
-plot(Me(:,1),Me(:,2),'b')
-hold on
-plot(LA(:,1),c.*LA(:,2),'r')
-axis padded
-title({'AMC-04-11-1' 'PM-BisGMA-Epon828' ['c = ' num2str(c) '   MSR = ' num2str(MSR)]})
-legend('Methacrylate','Structural','Location','Southeast')
-xlabel('Time (s)')
-ylabel('Conversion')
+        %Get path to variables
+        varpath = fullfile(obj.savefilePath,'Variables');
 
-%%
-figure
-load('AMC-04-11-2_LA_0s_fitparameters');
-LA = [fitparams.time fitparams.conversion fitparams.fitting];
-load('AMC-04-11-2_0s_fitparameters');
-Me = [fitparams.time fitparams.conversion fitparams.fitting];
+        %Get epoxy type
+        epType = obj.activeTestname;
+        %Get run name
+        runName = obj.activeTest;
+    
+        % Get LA
+        LAName = sprintf("Epoxy_%s_LA_0s_fitparameterssettings.mat",runName);
+        LAPath = fullfile(varpath,LAName);
+        load(LAPath);
+        LA = [result.time',result.conversion'];           %Drop fitparams since it isn't used in active code can add back
+    
+        % Get ME
+        MEName = sprintf("Epoxy_%s_0s_fitparameterssettings.mat",runName);
+        MEPath = fullfile(varpath,MEName);                 
+        load(MEPath);
+        ME = [result.time',result.conversion'];           %Drop fitparams since it isn't used in active code can add back
 
-% subplot(2,2,1)
-% plot(LA(:,1),LA(:,2),'r')
-% hold on
-% plot(Me(:,1),Me(:,2),'b')
-% 
-% axis padded
-% subplot(2,2,2)
-% plot(LA(:,1),Me(:,2)./LA(:,2),'k--')
-% axis padded
-figure
-plot(LA(:,1),Me(:,2)./LA(:,2),'k--')
-xlabel('Time (s)')
-ylabel('Proportionality')
-title({'AMS-01-6-2' 'PM-BisGMA-Epon828'})
-axis([0 3500 1.5 3])
-% subplot(2,2,3)
-% plot(LA(:,1),LA(:,3),'r')
-% hold on
-% plot(Me(:,1),Me(:,3),'b')
-% axis padded
-% subplot(2,2,4)
-% plot(LA(:,1),Me(:,3)./LA(:,3),'k--')
-% axis padded
-% mean(Me(:,3)./LA(:,3))
-% std(Me(:,3)./LA(:,3))
-% figure
-figure
-c = mean(Me(35:8026,2)./LA(35:8026,2))
-MSR = mean((Me(:,2)-c.*LA(:,2)).^2)
-std(Me(35:8026,2)./LA(35:8026,2))
-plot(Me(:,1),Me(:,2),'b')
-hold on
-plot(LA(:,1),c.*LA(:,2),'r')
-axis padded
-title({'AMC-04-11-2' 'PM-BisGMA-Epon828' ['c = ' num2str(c) '   MSR = ' num2str(MSR)]})
-legend('Methacrylate','Structural','Location','Southeast')
-xlabel('Time (s)')
-ylabel('Conversion')
+    %% Calculate Proportionality and Create Plot
+        disp("Creating figures");
+        %Create Figs
+        if obj.hidePlots == 1
+            propFig = figure('Visible','off');
+            propFigTrimmed = figure('Visible','off');
+            combinedFig = figure('Visible','off');
+        else
+            propFig = figure;
+            propFigTrimmed = figure;
+            combinedFig = figure;
+        end
+
+        %Create Proportionality Fig
+        set(0,'currentfigure',propFig)
+        plot(LA(:,1),ME(:,2)./LA(:,2),'k--')
+        xlabel('Time (s)')
+        ylabel('Proportionality')
+        titleStr = strjoin([runName,epType]);
+        title(titleStr);
+        axis([0 size(LA,1) .5 15])
+            %Save PNG
+            imageData = getframe(propFig);
+            imwrite(imageData.cdata,fullfile(plotSavePath,'prop_fig.png'));
+
+        %Trim Data to remove noisy spikes
+        Y = ME(:,2)./LA(:,2);
+        trimData = filloutliers(Y,"linear","quartiles","ThresholdFactor",4);    %Linear interp outliers
+        %trimData = rmoutliers(t,"quartiles","ThresholdFactor",4);              %Remove outliers 
+
+        %Remove any NaN's present
+        trimData(isnan(trimData)) = 0;
+
+        %Create Trimmed Proportionality Fig
+        set(0,'currentfigure',propFigTrimmed)
+        plot(LA(:,1),trimData,'k--')
+        xlabel('Time (s)')
+        ylabel('Proportionality')
+        titleStrTrim = strjoin([runName,epType,'Trimmed Data']);
+        title(titleStrTrim);
+        axis([0 size(LA,1) .5 2.5])
+            %Save PNG
+            imageData = getframe(propFigTrimmed);
+            imwrite(imageData.cdata,fullfile(plotSavePath,'prop_fig_trimmed.png'));
+
+        %Calculate Proportionality
+        c = mean(trimData);
+        MSR = mean((ME(:,2)-c.*LA(:,2)).^2);
+        std(ME(:,2)./LA(:,2));
+
+        %Create combined plot
+        set(0,'currentfigure',combinedFig)
+        plot(ME(:,1),ME(:,2),'c.');
+        hold("on");
+        plot(LA(:,1),c.*LA(:,2),'m.');
+        axis("padded");
+        titleStr = strjoin([titleStr,'c=',num2str(c),'MSR=',num2str(MSR)]);
+        title(titleStr);
+        legend('Epoxy','Structural','Location','Southeast');
+        xlabel('Time (s)');
+        ylabel('Conversion');
+            %Save PNG
+            imageData = getframe(combinedFig);
+            imwrite(imageData.cdata,fullfile(plotSavePath,'combined_plot.png'));
+
+        %Save off variables and figures
+        comp = mexext;
+        if 1 == strcmp(comp,'mexw64')
+            path = fullfile(obj.savefilePath,"Variables",[runName,'_proportionality_consts']);
+            save(path,"c","MSR","trimData",'-v7.3');
+        else
+            disp("Your machine is 32-bit and may have issues with saving matlab variables greater then 2GB")
+            path = fullfile(obj.savefilePath,"Variables",[runName,'_proportionality_consts']);
+            save(path,"c","MSR","trimData");
+        end
+
+        switch obj.savePlotFigs
+            case 0
+                disp("Setting not selected to save off plot figures")
+            case 1
+                disp("Saving Plot figures");
+
+                disp("Saving untrimmed prop consts Plot");
+                saveLoc = fullfile(figureSavePath,"prop_const.fig");
+                str = strjoin(["Untrimmed prop const plot saved at",saveLoc]);
+                savefig(propFig,saveLoc,"compact");
+                disp(str);
+
+                disp("Saving trimmed prop consts Plot");
+                saveLoc = fullfile(figureSavePath,"prop_const_trim.fig");
+                str = strjoin(["Trimmed prop const plot saved at",saveLoc]);
+                savefig(propFigTrimmed,saveLoc,"compact");
+                disp(str);
+
+                disp("Saving combined Plot");
+                saveLoc = fullfile(figureSavePath,"combined_plot.fig");
+                str = strjoin(["Combined plot saved at",saveLoc]);
+                savefig(combinedFig,saveLoc,"compact");
+                disp(str);
+        end
+
+        delete(progBar);
+end
