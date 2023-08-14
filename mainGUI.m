@@ -300,11 +300,19 @@ classdef mainGUI < handle
 
             %Loop to create the updating test selection
             for i=1:size(obj.activeTestOrder.order,2)
+                try
+                    delete(obj.progUI.ckbox(i))
+                catch
+                end
                 UI.ckbox(i) = uicheckbox(obj.UIGrids.midL,"Value",1,"Text",...
                     "");
                 UI.ckbox(i).Layout.Row = i+1;
                 UI.ckbox(i).Layout.Column = 1;
 
+                try
+                    delete(obj.progUI.lbl(i))
+                catch
+                end
                 UI.lbl(i) = uilabel(obj.UIGrids.midL,"Text",...
                     obj.activeTestOrder.order(i),"FontSize",...
                     obj.fontSz.bodyFontSize,...
@@ -312,6 +320,10 @@ classdef mainGUI < handle
                 UI.lbl(i).Layout.Row = i+1;
                 UI.lbl(i).Layout.Column = 2;
 
+                try
+                    delete(obj.progUI.status(i))
+                catch
+                end
                 UI.status(i) = uilabel(obj.UIGrids.midL,"Text",...
                     "N/A","FontSize",...
                     obj.fontSz.bodyFontSize,"FontWeight","bold",...
@@ -475,7 +487,7 @@ classdef mainGUI < handle
             selection = obj.UIelements.misc.axesDrpDown.Value;
             switch selection
                 case 'Kinetics Fit'
-                    fitpath = fullfile(obj.savefilePath,'Variables',"Epoxy_*settings.mat");
+                    fitpath = fullfile(obj.savefilePath,'Variables',"*settings.mat");
                     fitpath = dir(fitpath);
                     fitpath = fullfile(fitpath(1).folder,fitpath(1).name);
                     load(fitpath,'fitparams','gof');
@@ -501,7 +513,7 @@ classdef mainGUI < handle
                         ['SSE = ' num2str(sse)]};
                     text(ax,max(plotData.x)*.7,.1,s)
                 case 'LA Kinetics Fit'
-                    fitpath = fullfile(obj.savefilePath,'Variables',"Epoxy_*LA*settings.mat");
+                    fitpath = fullfile(obj.savefilePath,'Variables',"*LA*settings.mat");
                     fitpath = dir(fitpath);
                     fitpath = fullfile(fitpath(1).folder,fitpath(1).name);
                     load(fitpath,'fitparams','gof');

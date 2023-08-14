@@ -36,13 +36,20 @@ function LA_Me_Comp(obj)
         runName = obj.activeTest;
     
         % Get LA
-        LAName = sprintf("Epoxy_%s_LA_0s_fitparameterssettings.mat",runName);
+        switch obj.activeTestname
+            case "Epon828"
+                LAName = sprintf("Epoxy_%s_LA_0s_fitparameterssettings.mat",runName);
+                MEName = sprintf("Epoxy_%s_0s_fitparameterssettings.mat",runName);
+            otherwise
+                LAName = sprintf("%s_LA_0s_fitparameterssettings.mat",runName);
+                MEName = sprintf("%s_0s_fitparameterssettings.mat",runName);
+        end
+        
         LAPath = fullfile(varpath,LAName);
         load(LAPath);
         LA = [result.time',result.conversion'];           %Drop fitparams since it isn't used in active code can add back
     
         % Get ME
-        MEName = sprintf("Epoxy_%s_0s_fitparameterssettings.mat",runName);
         MEPath = fullfile(varpath,MEName);                 
         load(MEPath);
         ME = [result.time',result.conversion'];           %Drop fitparams since it isn't used in active code can add back
@@ -66,7 +73,7 @@ function LA_Me_Comp(obj)
         xlabel('Time (s)')
         ylabel('Proportionality')
         titleStr = strjoin([runName,epType]);
-        title(titleStr);
+        title(titleStr,"Interpreter","none");
         axis([0 size(LA,1) .5 15])
             %Save PNG
             imageData = getframe(propFig);
@@ -86,7 +93,7 @@ function LA_Me_Comp(obj)
         xlabel('Time (s)')
         ylabel('Proportionality')
         titleStrTrim = strjoin([runName,epType,'Trimmed Data']);
-        title(titleStrTrim);
+        title(titleStrTrim,"Interpreter","none");
         axis([0 size(LA,1) .5 2.5])
             %Save PNG
             imageData = getframe(propFigTrimmed);
@@ -104,7 +111,7 @@ function LA_Me_Comp(obj)
         plot(LA(:,1),c.*LA(:,2),'m.');
         axis("padded");
         titleStr = strjoin([titleStr,'c=',num2str(c),'MSR=',num2str(MSR)]);
-        title(titleStr);
+        title(titleStr,"Interpreter","none");
         legend('Epoxy','Structural','Location','Southeast');
         xlabel('Time (s)');
         ylabel('Conversion');

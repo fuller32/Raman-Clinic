@@ -183,11 +183,18 @@ progBar = uiprogressdlg(obj.figure,"Title","Saving Files",...
     "Indeterminate","on");
 
 R = [alpha;T];
+
+switch obj.activeTestname
+    case "Epon828"
+        epType = 'Epoxy_';
+    otherwise
+        epType = '';
+end
 if range == 0
-    path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'__LA_full_range.csv']);
+    path = fullfile(obj.savefilePath,"Variables",[epType,name,'__LA_full_range.csv']);
     writematrix(R,path);
 else
-    path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_LA_',num2str(range),'s.csv']);
+    path = fullfile(obj.savefilePath,"Variables",[epType,name,'_LA_',num2str(range),'s.csv']);
     writematrix(R,path);
 end
 
@@ -196,13 +203,13 @@ plotData.y = alpha;
 
 comp = mexext;
 if 1 == strcmp(comp,'mexw64')
-    path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_LA_',num2str(range),'s_fitparameters','settings']);
+    path = fullfile(obj.savefilePath,"Variables",[epType,name,'_LA_',num2str(range),'s_fitparameters','settings']);
     save(path,'fitparams','gof','result','-v7.3');
     path = fullfile(obj.savefilePath,"Variables","LA_Kinetics_PlotData");
     save(path,'plotData','-v7.3')
 else
     disp("Your machine is 32-bit and may have issues with saving matlab variables greater then 2GB")
-    path = fullfile(obj.savefilePath,"Variables",['Epoxy_',name,'_LA_',num2str(range),'s_fitparameters','settings']);
+    path = fullfile(obj.savefilePath,"Variables",[epType,name,'_LA_',num2str(range),'s_fitparameters','settings']);
     save(path,'fitparams','gof', 'result');
     path = fullfile(obj.savefilePath,"Variables","LA_Kinetics_PlotData");
     save(path,'plotData')

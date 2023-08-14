@@ -77,14 +77,14 @@ classdef dataTrimWindow < handle
             axes.plotAxesL.Layout.Column = 1;
             obj.Lbrush = brush(axes.plotAxesL);
             obj.Lbrush.Enable = 'on';
-            set(obj.Rbrush,"ActionPostCallback",@(h,e)brushedData(obj));
+            set(obj.Lbrush,"ActionPostCallback",@(h,e)brushedData(obj,"LBrush"));
 
             axes.plotAxesR = uiaxes(obj.UIGrids.mainGrid);
             axes.plotAxesR.Layout.Row = 1;
             axes.plotAxesR.Layout.Column = 2;
             obj.Rbrush = brush(axes.plotAxesR);
             obj.Rbrush.Enable = 'on';
-            set(obj.Rbrush,"ActionPostCallback",@(h,e)brushedData(obj));
+            set(obj.Rbrush,"ActionPostCallback",@(h,e)brushedData(obj,"RBrush"));
 
             %Create Okay button
             buttons.okBtn = uibutton(obj.UIGrids.mainGrid,"Text","Accept",...
@@ -108,7 +108,7 @@ classdef dataTrimWindow < handle
 
             disp("Plotting data")
             %Kinetics Fit
-            fitpath = fullfile(obj.savefilePath,'Variables',"Epoxy_*settings.mat");
+            fitpath = fullfile(obj.savefilePath,'Variables',"*settings.mat");
             fitpath = dir(fitpath);
             fitpath = fullfile(fitpath(1).folder,fitpath(1).name);
             load(fitpath,'fitparams','gof');
@@ -128,7 +128,7 @@ classdef dataTrimWindow < handle
             title(ax,{obj.activeData, 'Extent of Cure Kinetics'},'interpreter','none');
 
             %LA Kinetics Fit
-            fitpath = fullfile(obj.savefilePath,'Variables',"Epoxy_*LA*settings.mat");
+            fitpath = fullfile(obj.savefilePath,'Variables',"*LA*settings.mat");
             fitpath = dir(fitpath);
             fitpath = fullfile(fitpath(1).folder,fitpath(1).name);
             load(fitpath,'fitparams','gof');
@@ -147,10 +147,15 @@ classdef dataTrimWindow < handle
             title(ax,{obj.activeData, 'Extent of Cure Kinetics'},'interpreter','none');
         end
 
-        function brushedData(obj)
+        function brushedData(obj,selection)
             disp("Getting brushed data")
             ax = obj.UIelements.axes.plotAxesR;
             selectionHandle = ax.Children(1).BrushHandles;
+            if isempty(selectionHandle) == 1
+                ax = obj.UIelements.axes.plotAxesL;
+                selectionHandle = ax.Children(1).BrushHandles;
+            end
+
             selectedData=selectionHandle.Children(1).VertexData;
             obj.xData = selectedData(1,:);
             obj.yData = selectedData(2,:);
