@@ -13,3 +13,5 @@
 diaryLog
 #Ignore Excels
 *.xlsx
+#Ignore Example code
+/EX Code

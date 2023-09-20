@@ -94,7 +94,7 @@ function LA_Me_Comp(obj)
         ylabel('Proportionality')
         titleStrTrim = strjoin([runName,epType,'Trimmed Data']);
         title(titleStrTrim,"Interpreter","none");
-        axis([0 size(LA,1) .5 2.5])
+        axis([0 size(LA,1) .5 6])
             %Save PNG
             imageData = getframe(propFigTrimmed);
             imwrite(imageData.cdata,fullfile(plotSavePath,'prop_fig_trimmed.png'));
