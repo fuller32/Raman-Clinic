@@ -123,13 +123,13 @@ function w = omega_Calc(obj)
 
     %Find inflection point and trim
     %Chemical
-    [trimmedTimeChem, trimmedAlphaChem] = FindInflectionPoint(timeChem, alphaChem, 0.007,4);
+    [trimmedTimeChem, trimmedAlphaChem] = FindInflectionPoint(timeChem, alphaChem, 0.005,3);
     %Structual
-    [trimmedTimeStruc, trimmedAlphaStruc] = FindInflectionPoint(timeStruc, alphaStruc, 0.005,4);
+    [trimmedTimeStruc, trimmedAlphaStruc] = FindInflectionPoint(timeStruc, alphaStruc, 0.005,3);
 
     %Find fit
     %Chemical
-    [rateChem,rateFitChem,AfChem] = findRateFit(trimmedAlphaChem, trimmedTimeChem, 0.9999999);
+    [rateChem,rateFitChem,AfChem] = findRateFit(trimmedAlphaChem, trimmedTimeChem, 0.99999); %0.99999
     %Structual
     [rateStruc,rateFitStruc,AfStruc] = findRateFit(trimmedAlphaStruc, trimmedTimeStruc, 0.9999999);
 
@@ -154,17 +154,17 @@ function [trimmedTime,trimmedAlpha] = FindInflectionPoint(time, alpha, spec,orde
 %Function that handles the finding of the inflection point and trims the
 %data.
 %% Debug Code
-% fig = figure;
-% plot(time',alpha');
-% hold on 
-% yline(0,'k--')
-% axis([0 50 -.1 .5])
-% ylabel('\alpha')
-% xlabel('time')
+fig = figure;
+plot(time',alpha');
+hold on 
+yline(0,'k--')
+axis([0 50 -.1 .5])
+ylabel('\alpha')
+xlabel('time')
 
 %% Calc the derivative for the first 50 points
 colors = {'r','g','k','b','m'};
-for i = 1:5
+for i = 1:4
     timeSubSet = time(i,1:50);
     alphaSubSet = alpha(i,1:50);
     pFit{i} = polyfit(timeSubSet,alphaSubSet,order);
@@ -174,19 +174,19 @@ for i = 1:5
     pDiffVal{i} = polyval(pDiff{i},timeSubSet);
     
     % Debug Plots
-    % set(0,"CurrentFigure",fig);
-    % hold on
-    % plot(timeSubSet,pVal{i},colors{i},'LineWidth',5);
-    % 
-    % 
+    set(0,"CurrentFigure",fig);
+    hold on
+    plot(timeSubSet,pVal{i},colors{i},'LineWidth',5);
+
+
     temp = pDiffVal{i};
     itter = 1;
     while temp(itter) < spec
         itter = itter + 1;
     end
-    % 
-    % xline(timeSubSet(itter),'Color',colors{i});
-    % hold off
+
+    xline(timeSubSet(itter),'Color',colors{i});
+    hold off
     tempAlpha{i} = alpha(i,itter:end);
 end
 trimSz = 500000000;        
@@ -206,23 +206,23 @@ end
 
 
 % Debug Plots
-% Trim = figure;
-% plot(trimmedTime',trimmedAlpha');
-% hold on 
-% yline(0,'k--')
-% axis([0 50 -.1 .5])
-% ylabel('\alpha')
-% xlabel('time')
-% title('Trimmed Zoomed in')
-% 
-% TrimFull = figure;
-% plot(trimmedTime',trimmedAlpha');
-% hold on 
-% yline(0,'k--')
-% axis([0 trimSz -.1 .75])
-% ylabel('\alpha')
-% xlabel('time')
-% title('Trimmed Zoomed in')
+Trim = figure;
+plot(trimmedTime',trimmedAlpha');
+hold on 
+yline(0,'k--')
+axis([0 50 -.1 .5])
+ylabel('\alpha')
+xlabel('time')
+title('Trimmed Zoomed in')
+
+TrimFull = figure;
+plot(trimmedTime',trimmedAlpha');
+hold on 
+yline(0,'k--')
+axis([0 trimSz -.1 .75])
+ylabel('\alpha')
+xlabel('time')
+title('Trimmed Zoomed in')
 end
 
 function [Rate,RateFit,Af] = findRateFit(trimmedAlpha, trimmedTime, g)
@@ -252,6 +252,8 @@ for i = 1:sz
     %[2,3,0,1] = 2x^3+3x^2+1
     p = poly2sym(pMatrix);
     q = poly2sym(qMatrix);
+
+    clear('qMatrix','pMatrix');
     
     %Get function
     f(x) = p/q;

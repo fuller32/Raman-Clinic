@@ -15,3 +15,7 @@ diaryLog
 *.xlsx
 #Ignore Example code
 /EX Code
+#Don't add anything in results folder
+/Results/*/
+#Ignore DA-2 Folder
+/DA-2
