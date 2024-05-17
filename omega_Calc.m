@@ -1,6 +1,6 @@
 function w = omega_Calc(obj)
 %{
-    Function Name:              executionOrder.m
+    Function Name:              omega_Calc.m
     Date of origination:        9/13/2023
     Programmer:                 Robert V. Chimenti
                                 Seamus Fullerton
